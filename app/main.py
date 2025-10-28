@@ -8,17 +8,18 @@ from app.models import Admin, Laboratory, ServiceCategory, Test, TurnTime, Rate 
 
 app = FastAPI(title=settings.app_name)
 
-# Add CORS middleware
+# 👇 Add this CORS configuration
+origins = [
+    "https://satori-frontend.vercel.app",  # your Vercel frontend
+    "http://localhost:3000",               # optional, for local testing
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://satori.vercel.app"  # your Vercel frontend domain
-    ],
+    allow_origins=origins,          # frontend URLs allowed to access backend
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],            # allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],            # allow all headers
 )
 
 # Include Routers
