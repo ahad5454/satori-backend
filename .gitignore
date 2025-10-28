@@ -1,0 +1,161 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Environment / secrets
+.env
+.env.*
+secrets.json
+
+# Database files
+*.sqlite3
+*.sqlite
+*.db
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Python tooling caches
+.mypy_cache/
+.pyre/
+__pypackages__/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Logs
+*.log
+
+# Packaging
+pip-wheel-metadata/
+dist/
+build/
+```// filepath: /Users/apple/Desktop/satori/backend/.gitignore
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Environment / secrets
+.env
+.env.*
+secrets.json
+
+# Database files
+*.sqlite3
+*.sqlite
+*.db
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Python tooling caches
+.mypy_cache/
+.pyre/
+__pypackages__/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Logs
+*.log
+
+# Packaging
+pip-wheel-metadata/
+dist/
+build/
