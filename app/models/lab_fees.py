@@ -59,8 +59,10 @@ class Rate(Base):
     turn_time_id = Column(Integer, ForeignKey("turn_times.id"), nullable=False)
     lab_id = Column(Integer, ForeignKey("laboratories.id"), nullable=False)
     price = Column(Float, nullable=False)
+    sample_count = Column(Float, nullable=True)  # <-- NEW FIELD
 
     # Relationships
     test = relationship("Test", back_populates="rates")
     turn_time = relationship("TurnTime", back_populates="rates")
     laboratory = relationship("Laboratory", back_populates="rates")
+

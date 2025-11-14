@@ -1,0 +1,32 @@
+HRS_TO_LAB_MAPPING = {
+    "asbestos": {
+        "service_category": "PLM - Bulk Building Materials",
+        "test_name": "EPA/600/R-93/116 (<1%)",
+        "turnaround": "24 Hrs"
+    },
+    "lead_xrf": {
+        "service_category": "",
+        "test_name": ""
+        "turnaround": ""
+    },
+    "lead_chips_wipes": {
+        "service_category": "Lead Laboratory Services",
+        "test_name": "Paint Chips (SW-846-7000B)",  
+        "turnaround": "24 Hrs"
+    },
+    "mold_tape_lift": {
+        "service_category": "Mold Related Services - EMLab P&K",
+        "test_name": "Direct Microscopic Examination",
+        "turnaround": "Standard"
+    },
+    "mold_spore_trap": {
+        "service_category": "Mold Related Services - EMLab P&K",
+        "test_name": "Spore Trap Analysis", 
+        "turnaround": "Standard"
+    },
+    "mold_culturable": {
+        "service_category": "Mold Related Services - EMLab P&K",
+        "test_name": "Culturable air fungi speciation", 
+        "turnaround": "Standard"
+    }
+}

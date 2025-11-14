@@ -47,6 +47,7 @@ class RateBase(BaseModel):
     turn_time_id: int
     lab_id: int
     price: float
+    sample_count: Optional[float] = None   # ✅ New field added
 
 
 class RateCreate(RateBase):

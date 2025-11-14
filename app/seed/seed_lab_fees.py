@@ -7,7 +7,7 @@ def seed_lab_fees():
     db: Session = SessionLocal()
 
     try:
-        # --- 1️⃣ Create tables if they don't exist (never drop existing data!)
+        # --- Create tables if they don't exist (never drop existing data!)
         print("Creating tables if not exist...")
         Base.metadata.create_all(bind=engine)
 

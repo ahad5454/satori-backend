@@ -11,3 +11,6 @@ from .lab_fees import (
     Rate,
     RateCreate,
 )
+
+from.hrs_estimator import *
+
