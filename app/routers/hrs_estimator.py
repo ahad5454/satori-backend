@@ -8,7 +8,7 @@ from app.models.lab_fees import ServiceCategory, Test, TurnTime, Rate
 
 router = APIRouter()
 
-# --- internal helpers ---
+# internal helpers 
 DEFAULTS = {
     "asbestos": 15.0,  # 2002
     "xrf": 3.0,        # 3300
@@ -21,7 +21,7 @@ HRS_TO_LAB_MAPPING = {
     "asbestos": {
         "service_category": "PLM - Bulk Building Materials",
         "test_name": "EPA/600/R-93/116 (<1%)",
-        "turnaround": "24 hr"  # ✅ fixed
+        "turnaround": "24 hr" 
     },
     "lead_xrf": {
         "service_category": "",
@@ -31,7 +31,7 @@ HRS_TO_LAB_MAPPING = {
     "lead_chips_wipes": {
         "service_category": "Lead Laboratory Services",
         "test_name": "Paint Chips (SW-846-7000B)",
-        "turnaround": "24 hr"  # ✅ fixed
+        "turnaround": "24 hr" 
     },
     "mold_tape_lift": {
         "service_category": "Mold Related Services - EMLab P&K",
@@ -141,7 +141,7 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
     db.add(est)
     db.flush()  # get est.id for child rows
 
-    # ----- Asbestos lines -----
+    # Asbestos lines 
     total_plm = 0.0
     for line in payload.asbestos_lines:
         bulk_summary = (line.actuals or 0.0) * (line.bulks_per_unit or 0.0)
@@ -155,7 +155,7 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
             bulk_summary=bulk_summary
         ))
 
-    # ----- Lead lines -----
+    # Lead lines 
     total_xrf = 0.0
     total_chips = 0.0
     for line in payload.lead_lines:
@@ -170,7 +170,7 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
             chips_wipes=c
         ))
 
-    # ----- Mold lines -----
+    # Mold lines 
     total_tape = 0.0
     total_spore = 0.0
     total_cult = 0.0
@@ -189,7 +189,7 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
             culturable=cu
         ))
 
-    # ----- ORM -----
+    # ORM 
     orm_hours = 0.0
     if payload.orm is not None:
         orm_hours = payload.orm.hours or 0.0
@@ -199,7 +199,7 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
             hours=orm_hours
         ))
 
-    # ----- Persist totals to header -----
+    # Persist totals to header 
     est.total_plm = total_plm
     est.total_xrf_shots = total_xrf
     est.total_chips_wipes = total_chips
@@ -208,13 +208,13 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
     est.total_culturable = total_cult
     est.orm_hours = orm_hours
 
-    # ----- Minutes per sample: use override if present else default -----
+    # Minutes per sample: use override if present else default 
     m_asb = est.override_minutes_asbestos if est.override_minutes_asbestos is not None else est.default_minutes_asbestos
     m_xrf = est.override_minutes_xrf if est.override_minutes_xrf is not None else est.default_minutes_xrf
     m_lead = est.override_minutes_lead if est.override_minutes_lead is not None else est.default_minutes_lead
     m_mold = est.override_minutes_mold if est.override_minutes_mold is not None else est.default_minutes_mold
 
-    # ----- Hours (base) before staffing efficiency -----
+    # Hours (base) before staffing efficiency 
     h_asb = (m_asb * total_plm) / 60.0
     h_xrf = (m_xrf * total_xrf) / 60.0
     h_lead = (m_lead * total_chips) / 60.0
@@ -241,7 +241,7 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
         "efficiency_factor": est.efficiency_factor
     }
 
-    # ----- COST CALCULATIONS (New) -----
+    # COST CALCULATIONS (New)
     selected_role = payload.selected_role
     manual_hours = payload.manual_labor_hours or {}
 

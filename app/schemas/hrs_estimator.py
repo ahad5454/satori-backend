@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 
-# --------- Line Schemas ----------
+
 class AsbestosLineIn(BaseModel):
     component_name: str
     unit_label: str
@@ -24,7 +24,6 @@ class ORMIn(BaseModel):
     hours: float = 0.0
 
 
-# --------- Create Payload ----------
 class HRSEstimationCreate(BaseModel):
     project_name: Optional[str] = None
 
@@ -47,7 +46,6 @@ class HRSEstimationCreate(BaseModel):
     manual_labor_hours: Optional[Dict[str, float]] = None  # {"Program Manager": 5, "Accounting": 2}
 
 
-# --------- Response Schemas ----------
 class AsbestosLine(BaseModel):
     id: int
     component_name: str

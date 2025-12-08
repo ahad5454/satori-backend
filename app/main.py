@@ -4,18 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from app.core.config import settings
 from app.database import engine, Base
-
-# -------------------------------------------------------------------
-# Existing models
-# -------------------------------------------------------------------
-from app.models import (
-    Admin,
-    Laboratory,
-    ServiceCategory,
-    Test,
-    TurnTime,
-    Rate
-)
+from app.models import *
 
 # HRS Estimator models (must remain untouched)
 from app.models.hrs_estimator import (
@@ -26,21 +15,13 @@ from app.models.hrs_estimator import (
     OtherRegulatedMaterials
 )
 
-# -------------------------------------------------------------------
-# NEW: Logistics model import (so table is created)
-# -------------------------------------------------------------------
 from app.models.logistics import LogisticsEstimation
 
-
-# -------------------------------------------------------------------
-# Routers
-# -------------------------------------------------------------------
 from app.routers import auth, lab_fees
 from app.routers import hrs_estimator
 
-# NEW: Logistics router import
+# Logistics router import
 from app.routers import logistics
-
 
 app = FastAPI(title=settings.app_name)
 
@@ -58,9 +39,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -------------------------------------------------------------------
-# Include Routers
-# -------------------------------------------------------------------
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(lab_fees.router, prefix="/lab-fees", tags=["Lab Fees"])
 app.include_router(hrs_estimator.router, prefix="/hrs-estimator", tags=["HRS Estimator"])
@@ -68,9 +46,6 @@ app.include_router(hrs_estimator.router, prefix="/hrs-estimator", tags=["HRS Est
 # NEW: Logistics router
 app.include_router(logistics.router, prefix="/logistics", tags=["Logistics"])
 
-# -------------------------------------------------------------------
-# Auto-create tables and ensure schema sync on startup
-# -------------------------------------------------------------------
 @app.on_event("startup")
 def create_tables():
     print("Creating database tables if not exist...")

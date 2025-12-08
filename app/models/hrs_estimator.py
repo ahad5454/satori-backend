@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
 
-# ---- Top-level estimation "session" ----
+# Top-level estimation "session"
 class HRSEstimation(Base):
     __tablename__ = "hrs_estimations"
 
@@ -58,7 +58,7 @@ class HRSEstimation(Base):
     orm_record = relationship("OtherRegulatedMaterials", back_populates="estimation", uselist=False, cascade="all, delete-orphan")
 
 
-# ---- Asbestos: Actuals * Bulks per Unit = Bulk Summary ----
+# Asbestos: Actuals * Bulks per Unit = Bulk Summary
 class AsbestosComponentLine(Base):
     __tablename__ = "hrs_asbestos_lines"
 
@@ -73,7 +73,7 @@ class AsbestosComponentLine(Base):
     estimation = relationship("HRSEstimation", back_populates="asbestos_lines")
 
 
-# ---- Lead ----
+# Lead 
 class LeadComponentLine(Base):
     __tablename__ = "hrs_lead_lines"
 
@@ -86,7 +86,7 @@ class LeadComponentLine(Base):
     estimation = relationship("HRSEstimation", back_populates="lead_lines")
 
 
-# ---- Mold ----
+# Mold 
 class MoldComponentLine(Base):
     __tablename__ = "hrs_mold_lines"
 
@@ -100,7 +100,7 @@ class MoldComponentLine(Base):
     estimation = relationship("HRSEstimation", back_populates="mold_lines")
 
 
-# ---- ORM ----
+# ORM
 class OtherRegulatedMaterials(Base):
     __tablename__ = "hrs_orm_record"
 
@@ -112,7 +112,7 @@ class OtherRegulatedMaterials(Base):
     estimation = relationship("HRSEstimation", back_populates="orm_record")
 
 
-# ---- Reference Tables ----
+# Reference Tables
 class SamplingDefault(Base):
     __tablename__ = "hrs_sampling_defaults"
     id = Column(Integer, primary_key=True, index=True)

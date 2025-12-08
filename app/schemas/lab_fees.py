@@ -2,9 +2,6 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 
-# -------------------------------------------------------------------
-# Laboratory Schemas
-# -------------------------------------------------------------------
 class LaboratoryBase(BaseModel):
     name: str
     address: Optional[str] = None
@@ -21,9 +18,6 @@ class Laboratory(LaboratoryBase):
         orm_mode = True
 
 
-# -------------------------------------------------------------------
-# Turnaround Time Schemas
-# -------------------------------------------------------------------
 class TurnTimeBase(BaseModel):
     label: str
     hours: Optional[int] = None
@@ -39,15 +33,12 @@ class TurnTime(TurnTimeBase):
         orm_mode = True
 
 
-# -------------------------------------------------------------------
-# Rate Schemas
-# -------------------------------------------------------------------
 class RateBase(BaseModel):
     test_id: int
     turn_time_id: int
     lab_id: int
     price: float
-    sample_count: Optional[float] = None   # ✅ New field added
+    sample_count: Optional[float] = None  
 
 
 class RateCreate(RateBase):
@@ -61,9 +52,6 @@ class Rate(RateBase):
         orm_mode = True
 
 
-# -------------------------------------------------------------------
-# Test Schemas
-# -------------------------------------------------------------------
 class TestBase(BaseModel):
     name: str
     service_category_id: int
@@ -80,9 +68,6 @@ class Test(TestBase):
         orm_mode = True
 
 
-# -------------------------------------------------------------------
-# Service Category Schemas
-# -------------------------------------------------------------------
 class ServiceCategoryBase(BaseModel):
     name: str
     description: Optional[str] = None

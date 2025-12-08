@@ -7,9 +7,7 @@ from app.seed.seed_lab_fees import seed_lab_fees
 
 router = APIRouter()
 
-# -------------------------------------------------------------------
 # Laboratories
-# -------------------------------------------------------------------
 
 @router.get("/labs/", response_model=List[schemas.Laboratory])
 def get_labs(db: Session = Depends(get_db)):
@@ -29,9 +27,7 @@ def create_lab(lab: schemas.LaboratoryCreate, db: Session = Depends(get_db)):
     return new_lab
 
 
-# -------------------------------------------------------------------
 # Service Categories (linked to Labs)
-# -------------------------------------------------------------------
 
 @router.get("/categories/", response_model=List[schemas.ServiceCategory])
 def get_service_categories(lab_id: Optional[int] = None, db: Session = Depends(get_db)):
@@ -58,9 +54,7 @@ def create_service_category(category: schemas.ServiceCategoryCreate, db: Session
     return new_category
 
 
-# -------------------------------------------------------------------
 # Tests (linked to Service Categories)
-# -------------------------------------------------------------------
 
 @router.get("/tests/", response_model=List[schemas.Test])
 def get_tests(service_category_id: Optional[int] = None, db: Session = Depends(get_db)):
@@ -86,9 +80,7 @@ def create_test(test: schemas.TestCreate, db: Session = Depends(get_db)):
     return new_test
 
 
-# -------------------------------------------------------------------
 # Turnaround Times
-# -------------------------------------------------------------------
 
 @router.get("/turn_times/", response_model=List[schemas.TurnTime])
 def get_turn_times(db: Session = Depends(get_db)):
@@ -104,9 +96,7 @@ def create_turn_time(time: schemas.TurnTimeCreate, db: Session = Depends(get_db)
     return new_time
 
 
-# -------------------------------------------------------------------
 # Rates (linked to Lab + Test + Turnaround Time)
-# -------------------------------------------------------------------
 
 @router.get("/rates/", response_model=List[schemas.Rate])
 def get_rates(
@@ -168,9 +158,7 @@ def get_rates_by_category(service_category_id: int, db: Session = Depends(get_db
     return query.all()
 
 
-# -------------------------------------------------------------------
 # Seed Data
-# -------------------------------------------------------------------
 
 @router.post("/seed")
 def seed_data():
