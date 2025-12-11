@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database import get_db
 from app import models, schemas
+from app.models.hrs_estimator import LaborRate
 from app.seed.seed_lab_fees import seed_lab_fees
 
 router = APIRouter()
@@ -156,6 +157,141 @@ def get_rates_by_category(service_category_id: int, db: Session = Depends(get_db
         .filter(models.Test.service_category_id == service_category_id)
     )
     return query.all()
+
+
+# Lab Fees Orders with Staff Assignments
+
+@router.post("/orders/", response_model=schemas.LabFeesOrder)
+def create_lab_fees_order(order: schemas.LabFeesOrderCreate, db: Session = Depends(get_db)):
+    """Create a lab fees order with staff assignments and calculate costs"""
+    
+    # Calculate total samples and lab fees cost from order_details
+    total_samples = 0.0
+    total_lab_fees_cost = 0.0
+    
+    if order.order_details:
+        # order_details should contain test selections with quantities
+        # Format: {"test_id": {"turn_time_id": quantity, ...}, ...}
+        for test_id_str, turn_times in order.order_details.items():
+            test_id = int(test_id_str)
+            for turn_time_id_str, quantity in turn_times.items():
+                turn_time_id = int(turn_time_id_str)
+                qty = float(quantity)
+                
+                # Find the rate
+                rate = db.query(models.Rate).filter(
+                    models.Rate.test_id == test_id,
+                    models.Rate.turn_time_id == turn_time_id
+                ).first()
+                
+                if rate:
+                    total_samples += qty
+                    total_lab_fees_cost += rate.price * qty
+    
+    # Create order
+    new_order = models.LabFeesOrder(
+        project_name=order.project_name,
+        hrs_estimation_id=order.hrs_estimation_id,
+        order_details=order.order_details,
+        total_samples=total_samples,
+        total_lab_fees_cost=total_lab_fees_cost,
+        total_staff_labor_cost=0.0,
+        total_cost=total_lab_fees_cost
+    )
+    db.add(new_order)
+    db.flush()  # Get order.id
+    
+    # Process staff assignments
+    staff_breakdown = []
+    staff_labor_costs = {}
+    total_staff_labor_cost = 0.0
+    
+    if order.staff_assignments:
+        for staff_data in order.staff_assignments:
+            # Get labor rate for this role
+            labor_rate = db.query(LaborRate).filter(
+                LaborRate.labor_role == staff_data.role
+            ).first()
+            
+            if not labor_rate:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid role: {staff_data.role}. Role not found in labor rates."
+                )
+            
+            # Calculate costs
+            total_hours = staff_data.count * staff_data.hours_per_person
+            total_cost = total_hours * labor_rate.hourly_rate
+            
+            # Create staff assignment
+            staff_assignment = models.LabFeesStaffAssignment(
+                order_id=new_order.id,
+                role=staff_data.role,
+                count=staff_data.count,
+                hours_per_person=staff_data.hours_per_person,
+                total_hours=total_hours,
+                hourly_rate=labor_rate.hourly_rate,
+                total_cost=total_cost
+            )
+            db.add(staff_assignment)
+            
+            # Update summaries
+            staff_breakdown.append({
+                "role": staff_data.role,
+                "count": staff_data.count,
+                "total_hours": total_hours
+            })
+            
+            if staff_data.role in staff_labor_costs:
+                staff_labor_costs[staff_data.role] += total_cost
+            else:
+                staff_labor_costs[staff_data.role] = total_cost
+            
+            total_staff_labor_cost += total_cost
+    
+    # Update order totals
+    new_order.total_staff_labor_cost = total_staff_labor_cost
+    new_order.total_cost = total_lab_fees_cost + total_staff_labor_cost
+    new_order.staff_breakdown = staff_breakdown
+    new_order.staff_labor_costs = staff_labor_costs
+    
+    db.commit()
+    db.refresh(new_order)
+    
+    return new_order
+
+
+@router.get("/orders/{order_id}", response_model=schemas.LabFeesOrder)
+def get_lab_fees_order(order_id: int, db: Session = Depends(get_db)):
+    """Get a lab fees order by ID"""
+    order = db.query(models.LabFeesOrder).filter(models.LabFeesOrder.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
+
+
+@router.get("/orders/", response_model=List[schemas.LabFeesOrder])
+def get_lab_fees_orders(
+    project_name: Optional[str] = None,
+    hrs_estimation_id: Optional[int] = None,
+    db: Session = Depends(get_db)
+):
+    """Get all lab fees orders, optionally filtered by project name or HRS estimation ID"""
+    query = db.query(models.LabFeesOrder)
+    
+    if project_name:
+        query = query.filter(models.LabFeesOrder.project_name == project_name)
+    if hrs_estimation_id:
+        query = query.filter(models.LabFeesOrder.hrs_estimation_id == hrs_estimation_id)
+    
+    return query.order_by(models.LabFeesOrder.created_at.desc()).all()
+
+
+@router.get("/labor-rates")
+def get_labor_rates(db: Session = Depends(get_db)):
+    """Get all labor rates for staff role selection"""
+    rates = db.query(LaborRate).all()
+    return [{"labor_role": r.labor_role, "hourly_rate": r.hourly_rate} for r in rates]
 
 
 # Seed Data

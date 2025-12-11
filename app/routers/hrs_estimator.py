@@ -242,21 +242,46 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
     }
 
     # COST CALCULATIONS (New)
-    selected_role = payload.selected_role
+    selected_role = payload.selected_role  # Legacy support
+    staff_array = payload.staff or []  # New: multiple staff roles
     manual_hours = payload.manual_labor_hours or {}
 
-    selected_rate = None
     calculated_cost = None
+    staff_labor_costs = {}
     manual_costs = {}
     total_manual_cost = 0.0
+    total_staff_cost = 0.0
 
-    # Fetch rate for selected role
-    if selected_role:
+    # Handle multiple staff roles (new preferred method)
+    if staff_array and len(staff_array) > 0:
+        staff_breakdown = []
+        for staff_item in staff_array:
+            role = staff_item.get("role")
+            count = staff_item.get("count", 0)
+            if not role or count <= 0:
+                continue
+            
+            rate_entry = db.query(models.LaborRate).filter(models.LaborRate.labor_role == role).first()
+            if not rate_entry:
+                raise HTTPException(status_code=400, detail=f"Invalid role: {role}")
+            
+            # Calculate cost: suggested_hours_final × hourly_rate × count
+            role_cost = round(est.suggested_hours_final * rate_entry.hourly_rate * count, 2)
+            staff_labor_costs[role] = role_cost
+            total_staff_cost += role_cost
+            staff_breakdown.append({"role": role, "count": count})
+        
+        est.staff_breakdown = staff_breakdown
+        est.staff_labor_costs = staff_labor_costs
+        calculated_cost = total_staff_cost
+    # Legacy: single selected_role
+    elif selected_role:
         rate_entry = db.query(models.LaborRate).filter(models.LaborRate.labor_role == selected_role).first()
         if not rate_entry:
             raise HTTPException(status_code=400, detail=f"Invalid selected_role: {selected_role}")
         selected_rate = rate_entry.hourly_rate
         calculated_cost = round(est.suggested_hours_final * selected_rate, 2)
+        est.selected_role = selected_role
 
     # Manual labor costs
     for role, hours in manual_hours.items():
@@ -269,7 +294,6 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
 
     total_cost = (calculated_cost or 0.0) + total_manual_cost
 
-    est.selected_role = selected_role
     est.calculated_cost = calculated_cost
     est.manual_labor_hours = manual_hours
     est.manual_labor_costs = manual_costs
@@ -295,6 +319,15 @@ def get_estimate(estimation_id: int, db: Session = Depends(get_db)):
 @router.get("/estimates", response_model=List[schemas.HRSEstimation])
 def list_estimates(db: Session = Depends(get_db)):
     return db.query(models.HRSEstimation).order_by(models.HRSEstimation.id.desc()).all()
+
+
+@router.get("/labor-rates")
+def get_labor_rates(db: Session = Depends(get_db)):
+    """
+    Fetch all labor rates from the HRS LaborRate table for use in staff role selection.
+    """
+    rates = db.query(models.LaborRate).all()
+    return [{"labor_role": r.labor_role, "hourly_rate": r.hourly_rate} for r in rates]
 
 
 @router.post("/seed", tags=["HRS Estimator"])

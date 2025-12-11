@@ -24,6 +24,10 @@ def ensure_hrs_estimator_columns():
             conn.execute(text("ALTER TABLE hrs_estimations ADD COLUMN manual_labor_costs JSON;"))
         if "total_cost" not in columns:
             conn.execute(text("ALTER TABLE hrs_estimations ADD COLUMN total_cost FLOAT;"))
+        if "staff_breakdown" not in columns:
+            conn.execute(text("ALTER TABLE hrs_estimations ADD COLUMN staff_breakdown JSON;"))
+        if "staff_labor_costs" not in columns:
+            conn.execute(text("ALTER TABLE hrs_estimations ADD COLUMN staff_labor_costs JSON;"))
 
 
 def seed_hrs_estimator():

@@ -42,7 +42,8 @@ class HRSEstimationCreate(BaseModel):
     orm: Optional[ORMIn] = None
 
     # NEW FIELDS
-    selected_role: Optional[str] = None  # "Env Scientist" or "Env Technician"
+    selected_role: Optional[str] = None  # Legacy: single role
+    staff: Optional[List[Dict[str, Any]]] = None  # [{"role": "Env Scientist", "count": 1}, {"role": "Env Technician", "count": 1}]
     manual_labor_hours: Optional[Dict[str, float]] = None  # {"Program Manager": 5, "Accounting": 2}
 
 
@@ -107,7 +108,9 @@ class HRSEstimation(BaseModel):
     labor_breakdown: Optional[Dict[str, Any]] = None
 
     # NEW ROLE/COST FIELDS
-    selected_role: Optional[str] = None
+    selected_role: Optional[str] = None  # Legacy
+    staff_breakdown: Optional[List[Dict[str, Any]]] = None  # [{"role": "Env Scientist", "count": 1}]
+    staff_labor_costs: Optional[Dict[str, float]] = None  # {"Env Scientist": 500.00, "Env Technician": 300.00}
     calculated_cost: Optional[float] = None
     manual_labor_hours: Optional[Dict[str, float]] = None
     manual_labor_costs: Optional[Dict[str, float]] = None

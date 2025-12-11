@@ -59,7 +59,7 @@ def create_logistics_estimate(
     Falls back to legacy `professional_role` + `num_staff` if `staff` is not provided.
     """
 
-    # -------- Staff normalization (multi-role) --------
+    # Staff normalization (multi-role) 
     staff_list: List[Dict[str, Any]] = []
     if payload.staff:
         for s in payload.staff:
@@ -80,7 +80,7 @@ def create_logistics_estimate(
         payload.rate_multiplier if payload.rate_multiplier and payload.rate_multiplier > 0 else 1.0
     )
 
-    # -------- Create header row --------
+    # Create header row 
     est = models.LogisticsEstimation(
         project_name=payload.project_name,
         site_access_mode=payload.site_access_mode or "driving",
@@ -106,15 +106,13 @@ def create_logistics_estimate(
         r = _get_labor_rate(db, role_name)
         return r if r is not None else 0.0
 
-    # ------------------------------------------------------------------
     # DRIVING (Option A: Roundtrip + Daily)
-    # ------------------------------------------------------------------
     anchorage_driving = False  # True if roundtrip location is Anchorage
     roundtrip_days = 0
 
     driving_snapshot: Dict[str, Any] = {"roundtrip": None, "daily": None}
 
-    # ---- Roundtrip Driving ----
+    # Roundtrip Driving 
     roundtrip_miles = 0.0
     roundtrip_labor_hours_total = 0.0
     roundtrip_labor_cost_total = 0.0
@@ -247,7 +245,7 @@ def create_logistics_estimate(
                 staff_hours[role] = staff_hours.get(role, 0.0) + round(total_daily_hours, 2)
                 staff_costs[role] = staff_costs.get(role, 0.0) + round(total_daily_cost, 2)
 
-    # ---- Aggregate Driving Totals ----
+    # Aggregate Driving Totals 
     est.driving_input = (
         driving_snapshot
         if (driving_snapshot.get("roundtrip") or driving_snapshot.get("daily"))
@@ -272,9 +270,7 @@ def create_logistics_estimate(
         est.total_driving_fuel_cost + est.total_driving_labor_cost, 2
     )
 
-    # ------------------------------------------------------------------
     # FLIGHTS
-    # ------------------------------------------------------------------
     total_flight_cost = 0.0
     total_flight_labor_hours = 0.0
     total_flight_labor_cost = 0.0
@@ -334,9 +330,7 @@ def create_logistics_estimate(
         est.total_layover_room_cost = 0.0
         est.total_flight_cost = 0.0
 
-    # ------------------------------------------------------------------
     # RENTAL VEHICLES
-    # ------------------------------------------------------------------
     total_rental_cost = 0.0
     if (
         payload.site_access_mode == "flight"
@@ -371,9 +365,7 @@ def create_logistics_estimate(
         est.total_rental_fuel_cost = 0.0
         est.total_rental_cost = 0.0
 
-    # ------------------------------------------------------------------
     # LODGING + PER DIEM
-    # ------------------------------------------------------------------
     total_room_cost = 0.0
     total_per_diem = 0.0
 
@@ -398,9 +390,7 @@ def create_logistics_estimate(
     est.total_lodging_room_cost = round(total_room_cost, 2)
     est.total_per_diem_cost = round(total_per_diem, 2)
 
-    # ------------------------------------------------------------------
     # Finalize staff costs + legacy compatibility
-    # ------------------------------------------------------------------
     est.staff_labor_costs = staff_costs if staff_costs else None
     est.total_staff_count = total_staff
 
@@ -408,9 +398,7 @@ def create_logistics_estimate(
     if not est.professional_role and staff_list and len(staff_list) == 1:
         est.professional_role = staff_list[0]["role"]
 
-    # ------------------------------------------------------------------
     # GRAND TOTAL
-    # ------------------------------------------------------------------
     est.total_logistics_cost = round(
         est.total_driving_cost
         + est.total_flight_cost

@@ -40,8 +40,12 @@ class HRSEstimation(Base):
     suggested_hours_final = Column(Float, nullable=False, default=0.0)
 
     # NEW: role + cost fields
-    selected_role = Column(String, nullable=True)            # "Env Scientist" or "Env Technician"
-    calculated_cost = Column(Float, nullable=True)           # hours × rate
+    selected_role = Column(String, nullable=True)            # Legacy: single role
+    # Staff breakdown — list of {"role": str, "count": int} (like logistics)
+    staff_breakdown = Column(JSON, nullable=True)
+    # Per-role labor cost summary
+    staff_labor_costs = Column(JSON, nullable=True)
+    calculated_cost = Column(Float, nullable=True)           # hours × rate (for selected_role or staff_breakdown)
     manual_labor_hours = Column(JSON, nullable=True)         # {"Program Manager": 5, "Accounting": 2}
     manual_labor_costs = Column(JSON, nullable=True)         # {"Program Manager": 657.75, ...}
     total_cost = Column(Float, nullable=True)                # Total combined cost

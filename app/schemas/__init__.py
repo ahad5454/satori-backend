@@ -10,6 +10,10 @@ from .lab_fees import (
     TurnTimeCreate,
     Rate,
     RateCreate,
+    LabFeesOrder,
+    LabFeesOrderCreate,
+    LabFeesStaffAssignment,
+    LabFeesStaffAssignmentCreate,
 )
 
 from.hrs_estimator import *
