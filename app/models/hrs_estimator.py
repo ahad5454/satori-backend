@@ -45,6 +45,7 @@ class HRSEstimation(Base):
     staff_breakdown = Column(JSON, nullable=True)
     # Per-role labor cost summary
     staff_labor_costs = Column(JSON, nullable=True)
+    staff_labor_hours = Column(JSON, nullable=True)
     calculated_cost = Column(Float, nullable=True)           # hours × rate (for selected_role or staff_breakdown)
     manual_labor_hours = Column(JSON, nullable=True)         # {"Program Manager": 5, "Accounting": 2}
     manual_labor_costs = Column(JSON, nullable=True)         # {"Program Manager": 657.75, ...}
