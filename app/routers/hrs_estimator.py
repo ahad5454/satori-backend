@@ -211,3 +211,17 @@ def get_estimate(estimation_id: int, db: Session = Depends(get_db)):
     if not est:
         raise HTTPException(status_code=404, detail="Estimation not found")
     return est
+
+@router.get("/labor-rates")
+def get_labor_rates(db: Session = Depends(get_db)):
+    """
+    Fetch all labor roles and hourly rates for HRS Estimator staff selection.
+    """
+    rates = db.query(models.LaborRate).all()
+    return [
+        {
+            "labor_role": r.labor_role,
+            "hourly_rate": r.hourly_rate
+        }
+        for r in rates
+    ]
