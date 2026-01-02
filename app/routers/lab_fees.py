@@ -5,6 +5,8 @@ from app.database import get_db
 from app import models, schemas
 from app.models.hrs_estimator import LaborRate
 from app.seed.seed_lab_fees import seed_lab_fees
+from app.utils.project_summary import save_or_update_module_summary
+from app.utils.estimate_snapshot import save_module_to_snapshot
 
 router = APIRouter()
 
@@ -257,6 +259,51 @@ def create_lab_fees_order(order: schemas.LabFeesOrderCreate, db: Session = Depen
     
     db.commit()
     db.refresh(new_order)
+    
+    # Save/update project estimate summary
+    # Note: This happens after commit to ensure the order is persisted
+    save_or_update_module_summary(
+        db=db,
+        project_name=order.project_name,
+        module_name="lab",
+        estimate_total=new_order.total_cost or 0.0,
+        estimate_breakdown={
+            "total_lab_fees_cost": new_order.total_lab_fees_cost,
+            "total_staff_labor_cost": new_order.total_staff_labor_cost,
+            "total_samples": new_order.total_samples,
+            "staff_breakdown": new_order.staff_breakdown,
+            "staff_labor_costs": new_order.staff_labor_costs
+        }
+    )
+    
+    # Save to estimate snapshot (full inputs + outputs for form rehydration)
+    try:
+        inputs_dict = order.model_dump() if hasattr(order, 'model_dump') else order.dict()
+    except:
+        inputs_dict = order.dict() if hasattr(order, 'dict') else {}
+    
+    outputs_dict = {
+        "id": new_order.id,
+        "project_name": new_order.project_name,
+        "hrs_estimation_id": new_order.hrs_estimation_id,
+        "total_cost": new_order.total_cost,
+        "total_lab_fees_cost": new_order.total_lab_fees_cost,
+        "total_staff_labor_cost": new_order.total_staff_labor_cost,
+        "total_samples": new_order.total_samples,
+        "order_details": new_order.order_details,
+        "staff_breakdown": new_order.staff_breakdown,
+        "staff_labor_costs": new_order.staff_labor_costs,
+        "created_at": new_order.created_at.isoformat() if new_order.created_at else None,
+    }
+    save_module_to_snapshot(
+        db=db,
+        project_name=order.project_name,
+        module_name="lab",
+        inputs=inputs_dict,
+        outputs=outputs_dict
+    )
+    
+    db.commit()
     
     return new_order
 

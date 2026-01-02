@@ -23,6 +23,15 @@ from app.routers import hrs_estimator
 # Logistics router import
 from app.routers import logistics
 
+# Project Summary router import
+from app.routers import project_summary
+
+# Estimate Snapshot router import
+from app.routers import estimate_snapshot
+
+# Project router import
+from app.routers import project
+
 app = FastAPI(title=settings.app_name)
 
 # CORS configuration
@@ -46,10 +55,30 @@ app.include_router(hrs_estimator.router, prefix="/hrs-estimator", tags=["HRS Est
 # NEW: Logistics router
 app.include_router(logistics.router, prefix="/logistics", tags=["Logistics"])
 
+# NEW: Project Summary router
+app.include_router(project_summary.router, tags=["Project Summary"])
+
+# NEW: Estimate Snapshot router
+app.include_router(estimate_snapshot.router, tags=["Estimate Snapshots"])
+
+# NEW: Project router
+app.include_router(project.router, tags=["Projects"])
+
 @app.on_event("startup")
 def create_tables():
     print("Creating database tables if not exist...")
     Base.metadata.create_all(bind=engine)
+
+    # Run migration to add project_id columns
+    try:
+        from app.migrations.add_project_id_columns import migrate
+        migrate()
+        print("✅ Project ID migration completed.")
+    except Exception as e:
+        # Migration errors are non-fatal - columns might already exist
+        import traceback
+        print(f"⚠️  Migration note: {str(e)}")
+        print("   (This is normal if columns already exist or on first run)")
 
     # Ensure new column sample_count exists in rates table
     with engine.connect() as conn:

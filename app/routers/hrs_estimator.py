@@ -5,6 +5,8 @@ from app.database import get_db
 from app import models, schemas
 from app.seed.seed_hrs_estimator import seed_hrs_estimator
 from app.models.lab_fees import ServiceCategory, Test, TurnTime, Rate
+from app.utils.project_summary import save_or_update_module_summary
+from app.utils.estimate_snapshot import save_module_to_snapshot
 
 router = APIRouter()
 
@@ -16,29 +18,55 @@ DEFAULTS = {
     "mold": 20.0
 }
 
+"""
+HRS to Lab Fees mapping - Data Contract
+
+This mapping defines how HRS Sample Estimator outputs map to Lab Fees test selections.
+Each mapping entry explicitly defines:
+- hrs_output_key: The HRS output field name (e.g., "total_plm")
+- service_category: The Lab Fees service category name
+- test_name: The Lab Fees test name
+- turnaround: The turnaround time label
+
+This is a data contract, not a naming convention. The hrs_output_key is explicitly
+defined to avoid brittle assumptions about key names.
+
+The frontend uses this mapping to automatically derive Lab Fees quantities from HRS outputs.
+Future mappings added here will work automatically without code changes.
+"""
 HRS_TO_LAB_MAPPING = {
     "asbestos": {
+        "hrs_output_key": "total_plm",
         "service_category": "PLM - Bulk Building Materials",
         "test_name": "EPA/600/R-93/116 (<1%)",
         "turnaround": "24 hr"
     },
-    "lead_xrf": {"service_category": "", "test_name": "", "turnaround": ""},
+    "lead_xrf": {
+        "hrs_output_key": "total_xrf_shots",
+        "service_category": "",
+        "test_name": "",
+        "turnaround": ""
+    },
     "lead_chips_wipes": {
+        "hrs_output_key": "total_chips_wipes",
         "service_category": "Lead Laboratory Services",
         "test_name": "Paint Chips (SW-846-7000B)",
         "turnaround": "24 hr"
     },
     "mold_tape_lift": {
+        "hrs_output_key": "total_tape_lift",
         "service_category": "Mold Related Services - EMLab P&K",
         "test_name": "Direct Microscopic Examination",
         "turnaround": "Standard"
     },
     "mold_spore_trap": {
+        "hrs_output_key": "total_spore_trap",
         "service_category": "Mold Related Services - EMLab P&K",
         "test_name": "Spore Trap Analysis",
         "turnaround": "Standard"
     },
     "mold_culturable": {
+        "hrs_output_key": "total_culturable",
         "service_category": "Mold Related Services - EMLab P&K",
         "test_name": "Culturable air fungi speciation",
         "turnaround": "Standard"
@@ -202,6 +230,59 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
 
     db.commit()
     db.refresh(est)
+    
+    # Save/update project estimate summary
+    # Note: This happens after commit to ensure the estimate is persisted
+    save_or_update_module_summary(
+        db=db,
+        project_name=payload.project_name,
+        module_name="hrs_estimator",
+        estimate_total=est.total_cost or 0.0,
+        estimate_breakdown={
+            "calculated_cost": est.calculated_cost,
+            "suggested_hours_final": est.suggested_hours_final,
+            "staff_breakdown": est.staff_breakdown,
+            "staff_labor_costs": est.staff_labor_costs
+        }
+    )
+    
+    # Save to estimate snapshot (full inputs + outputs for form rehydration)
+    # Convert payload to dict for JSON storage
+    try:
+        inputs_dict = payload.model_dump() if hasattr(payload, 'model_dump') else payload.dict()
+    except:
+        inputs_dict = payload.dict() if hasattr(payload, 'dict') else {}
+    
+    outputs_dict = {
+        "id": est.id,
+        "project_name": est.project_name,
+        "total_cost": est.total_cost,
+        "calculated_cost": est.calculated_cost,
+        "suggested_hours_final": est.suggested_hours_final,
+        "staff_breakdown": est.staff_breakdown,
+        "staff_labor_costs": est.staff_labor_costs,
+        "staff_labor_hours": est.staff_labor_hours,
+        "selected_role": est.selected_role,
+        "field_staff_count": est.field_staff_count,
+        "efficiency_factor": est.efficiency_factor,
+        "total_plm": est.total_plm,
+        "total_xrf_shots": est.total_xrf_shots,
+        "total_chips_wipes": est.total_chips_wipes,
+        "total_tape_lift": est.total_tape_lift,
+        "total_spore_trap": est.total_spore_trap,
+        "total_culturable": est.total_culturable,
+        "orm_hours": est.orm_hours,
+    }
+    save_module_to_snapshot(
+        db=db,
+        project_name=payload.project_name,
+        module_name="hrs_estimator",
+        inputs=inputs_dict,
+        outputs=outputs_dict
+    )
+    
+    db.commit()
+    
     return est
 
 

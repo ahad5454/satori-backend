@@ -5,6 +5,8 @@ import math
 
 from app.database import get_db
 from app import models, schemas
+from app.utils.project_summary import save_or_update_module_summary
+from app.utils.estimate_snapshot import save_module_to_snapshot
 
 router = APIRouter(
     tags=["Logistics"]
@@ -410,6 +412,61 @@ def create_logistics_estimate(
 
     db.commit()
     db.refresh(est)
+    
+    # Save/update project estimate summary
+    # Note: This happens after commit to ensure the estimate is persisted
+    save_or_update_module_summary(
+        db=db,
+        project_name=payload.project_name,
+        module_name="logistics",
+        estimate_total=est.total_logistics_cost or 0.0,
+        estimate_breakdown={
+            "total_driving_cost": est.total_driving_cost,
+            "total_flight_cost": est.total_flight_cost,
+            "total_rental_cost": est.total_rental_cost,
+            "total_lodging_room_cost": est.total_lodging_room_cost,
+            "total_per_diem_cost": est.total_per_diem_cost,
+            "staff_labor_costs": est.staff_labor_costs
+        }
+    )
+    
+    # Save to estimate snapshot (full inputs + outputs for form rehydration)
+    try:
+        inputs_dict = payload.model_dump() if hasattr(payload, 'model_dump') else payload.dict()
+    except:
+        inputs_dict = payload.dict() if hasattr(payload, 'dict') else {}
+    
+    outputs_dict = {
+        "id": est.id,
+        "project_name": est.project_name,
+        "site_access_mode": est.site_access_mode,
+        "is_local_project": est.is_local_project,
+        "use_client_vehicle": est.use_client_vehicle,
+        "total_logistics_cost": est.total_logistics_cost,
+        "total_driving_cost": est.total_driving_cost,
+        "total_flight_cost": est.total_flight_cost,
+        "total_rental_cost": est.total_rental_cost,
+        "total_lodging_room_cost": est.total_lodging_room_cost,
+        "total_per_diem_cost": est.total_per_diem_cost,
+        "staff_breakdown": est.staff_breakdown,
+        "staff_labor_costs": est.staff_labor_costs,
+        "total_staff_count": est.total_staff_count,
+        "rate_multiplier": est.rate_multiplier,
+        "per_diem_rate": est.per_diem_rate,
+        "driving_input": est.driving_input,
+        "flights_input": est.flights_input,
+        "rental_input": est.rental_input,
+        "lodging_input": est.lodging_input,
+    }
+    save_module_to_snapshot(
+        db=db,
+        project_name=payload.project_name,
+        module_name="logistics",
+        inputs=inputs_dict,
+        outputs=outputs_dict
+    )
+    
+    db.commit()
 
     return est
 
