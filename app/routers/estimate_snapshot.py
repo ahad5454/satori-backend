@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import datetime
 from app.database import get_db
 from app import models
 from app.models.project_summary import ProjectEstimateSummary
@@ -57,84 +58,26 @@ def list_all_snapshots_global(db: Session = Depends(get_db)):
     """
     Get global estimate history: all projects with their snapshots.
     
-    This endpoint returns all projects that have estimate snapshots,
+    This endpoint returns ALL projects (not just ones with snapshots),
     grouped by project. Uses Project table as single source of truth.
-    This provides a global view of all historical estimates across all projects.
+    Projects without snapshots will have an empty snapshots list.
+    This provides a global view of all projects and their estimates.
     
     Does NOT require a project_name parameter.
     """
-    # Get all projects that have snapshots (using Project table as source of truth)
-    # If Project table is empty or snapshots don't have project_id yet, fall back to project_name
-    # Note: We get distinct project IDs first, then fetch projects to avoid JSON column equality issues with DISTINCT
-    project_ids = db.query(models.EstimateSnapshot.project_id).distinct().filter(
-        models.EstimateSnapshot.project_id.isnot(None)
-    ).all()
-    project_ids = [pid[0] for pid in project_ids if pid[0]]
-    
-    if not project_ids:
-        # Fallback: get unique project names from snapshots (for backward compatibility)
-        project_names = db.query(models.EstimateSnapshot.project_name).distinct().filter(
-            models.EstimateSnapshot.project_name.isnot(None)
-        ).all()
-        project_names = [p[0] for p in project_names if p[0]]
-        
-        result = []
-        for project_name in project_names:
-            # Get all snapshots for this project (by project_name - fallback)
-            snapshots = db.query(models.EstimateSnapshot).filter(
-                models.EstimateSnapshot.project_name == project_name
-            ).order_by(models.EstimateSnapshot.created_at.desc()).all()
-            
-            snapshot_list = []
-            for snapshot in snapshots:
-                # Extract totals from module data
-                hrs_total = None
-                lab_total = None
-                logistics_total = None
-                
-                if snapshot.hrs_estimator_data and snapshot.hrs_estimator_data.get("outputs"):
-                    hrs_total = snapshot.hrs_estimator_data["outputs"].get("total_cost")
-                
-                if snapshot.lab_fees_data and snapshot.lab_fees_data.get("outputs"):
-                    lab_total = snapshot.lab_fees_data["outputs"].get("total_cost")
-                
-                if snapshot.logistics_data and snapshot.logistics_data.get("outputs"):
-                    logistics_total = snapshot.logistics_data["outputs"].get("total_logistics_cost")
-                
-                grand_total = sum(
-                    (t if t is not None else 0.0) 
-                    for t in [hrs_total, lab_total, logistics_total]
-                )
-                
-                snapshot_list.append(EstimateSnapshotList(
-                    id=snapshot.id,
-                    project_name=snapshot.project_name,
-                    snapshot_name=snapshot.snapshot_name,
-                    is_active=snapshot.is_active,
-                    created_at=snapshot.created_at,
-                    updated_at=snapshot.updated_at,
-                    hrs_estimator_total=hrs_total,
-                    lab_fees_total=lab_total,
-                    logistics_total=logistics_total,
-                    grand_total=round(grand_total, 2) if grand_total else None
-                ))
-            
-            result.append(ProjectWithSnapshots(
-                project_name=project_name,
-                snapshots=snapshot_list
-            ))
-        
-        result.sort(key=lambda x: x.project_name)
-        return result
-    
-    # Fetch projects by IDs (avoids DISTINCT on JSON columns)
-    projects_with_snapshots = db.query(models.Project).filter(
-        models.Project.id.in_(project_ids)
+    # Get ALL projects from the Project table (not just ones with snapshots)
+    # This ensures consistency with /select-project which shows all projects
+    all_projects = db.query(models.Project).filter(
+        models.Project.status == "active"  # Only show active projects, matching /select-project behavior
     ).all()
     
-    # Use Project table (preferred path)
+    if not all_projects:
+        # No projects in database, return empty list
+        return []
+    
+    # Process all projects (including those without snapshots)
     result = []
-    for project in projects_with_snapshots:
+    for project in all_projects:
         # Get all snapshots for this project (by project_id)
         snapshots = db.query(models.EstimateSnapshot).filter(
             models.EstimateSnapshot.project_id == project.id
@@ -176,12 +119,14 @@ def list_all_snapshots_global(db: Session = Depends(get_db)):
             ))
         
         result.append(ProjectWithSnapshots(
+            project_id=project.id,  # Include project ID for deletion
             project_name=project.name,  # Use project.name from Project table
+            created_at=project.created_at,  # Include project creation date
             snapshots=snapshot_list
         ))
     
-    # Sort by project name for consistent ordering
-    result.sort(key=lambda x: x.project_name)
+    # Sort by creation date (most recent first), then by name if dates are equal
+    result.sort(key=lambda x: (x.created_at or datetime.min, x.project_name), reverse=True)
     
     return result
 

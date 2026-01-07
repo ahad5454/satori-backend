@@ -14,7 +14,8 @@ from datetime import datetime
 def get_or_create_project(
     db: Session,
     project_name: str,
-    description: Optional[str] = None
+    description: Optional[str] = None,
+    address: Optional[str] = None
 ) -> Project:
     """
     Get an existing project by name, or create a new one if it doesn't exist.
@@ -51,6 +52,7 @@ def get_or_create_project(
     # Create new project
     project = Project(
         name=project_name,
+        address=address,
         description=description,
         status="active"
     )

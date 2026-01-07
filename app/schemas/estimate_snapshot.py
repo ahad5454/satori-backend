@@ -56,7 +56,9 @@ class EstimateSnapshotList(BaseModel):
 
 class ProjectWithSnapshots(BaseModel):
     """Schema for a project with its snapshots (for global history)"""
+    project_id: Optional[int] = None  # Project ID for deletion
     project_name: str
+    created_at: Optional[datetime] = None  # Project creation date for sorting
     snapshots: List[EstimateSnapshotList]
     
     class Config:

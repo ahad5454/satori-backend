@@ -80,6 +80,16 @@ def create_tables():
         print(f"⚠️  Migration note: {str(e)}")
         print("   (This is normal if columns already exist or on first run)")
 
+    # Run migration to add address column to projects table
+    try:
+        from app.migrations.add_address_column import migrate as migrate_address
+        migrate_address()
+        print("✅ Address column migration completed.")
+    except Exception as e:
+        # Migration errors are non-fatal - column might already exist
+        print(f"⚠️  Address migration note: {str(e)}")
+        print("   (This is normal if column already exists)")
+
     # Ensure new column sample_count exists in rates table
     with engine.connect() as conn:
         conn.execute(text("ALTER TABLE rates ADD COLUMN IF NOT EXISTS sample_count DOUBLE PRECISION;"))

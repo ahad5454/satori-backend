@@ -20,6 +20,7 @@ class Project(Base):
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, nullable=False, index=True)  # Display name (non-unique)
+    address = Column(String, nullable=True)  # Project address (required for new projects, nullable for backward compatibility)
     description = Column(String, nullable=True)  # Optional project description
     
     # Summary/aggregated data from all modules (for quick access)

@@ -33,6 +33,7 @@ def create_project(
     """
     new_project = Project(
         name=project.name,
+        address=project.address,
         description=project.description,
         status=project.status or "active",
         tags=project.tags
@@ -116,6 +117,8 @@ def update_project(
     
     if project_update.name is not None:
         project.name = project_update.name
+    if project_update.address is not None:
+        project.address = project_update.address
     if project_update.description is not None:
         project.description = project_update.description
     if project_update.status is not None:

@@ -27,6 +27,7 @@ def migrate():
                 CREATE TABLE IF NOT EXISTS projects (
                     id SERIAL PRIMARY KEY,
                     name VARCHAR NOT NULL,
+                    address VARCHAR,
                     description VARCHAR,
                     hrs_estimator_total DOUBLE PRECISION,
                     lab_fees_total DOUBLE PRECISION,
