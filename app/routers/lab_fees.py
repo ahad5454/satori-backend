@@ -57,6 +57,29 @@ def create_service_category(category: schemas.ServiceCategoryCreate, db: Session
     return new_category
 
 
+@router.delete("/categories/{category_id}", status_code=204)
+def delete_service_category(category_id: int, db: Session = Depends(get_db)):
+    category = db.query(models.ServiceCategory).filter(models.ServiceCategory.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Service category not found")
+    
+    # Manually cascade delete: Rates -> Tests -> Category
+    # 1. Find all tests in this category
+    tests = db.query(models.Test).filter(models.Test.service_category_id == category_id).all()
+    
+    for test in tests:
+        # 2. Delete all rates for each test
+        db.query(models.Rate).filter(models.Rate.test_id == test.id).delete()
+    
+    # 3. Delete all tests
+    db.query(models.Test).filter(models.Test.service_category_id == category_id).delete()
+    
+    # 4. Delete the category
+    db.delete(category)
+    db.commit()
+    return None
+
+
 # Tests (linked to Service Categories)
 
 @router.get("/tests/", response_model=List[schemas.Test])
@@ -81,6 +104,20 @@ def create_test(test: schemas.TestCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_test)
     return new_test
+
+
+@router.delete("/tests/{test_id}", status_code=204)
+def delete_test(test_id: int, db: Session = Depends(get_db)):
+    test = db.query(models.Test).filter(models.Test.id == test_id).first()
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    # Manually cascade delete: Rates -> Test
+    db.query(models.Rate).filter(models.Rate.test_id == test_id).delete()
+    
+    db.delete(test)
+    db.commit()
+    return None
 
 
 # Turnaround Times
