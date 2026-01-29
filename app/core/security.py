@@ -1,11 +1,8 @@
-from passlib.context import CryptContext
-from jose import jwt
-from datetime import datetime, timedelta
-import os
+from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-SECRET_KEY = "supersecret" 
+SECRET_KEY = settings.secret_key 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
