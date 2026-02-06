@@ -36,8 +36,9 @@ app = FastAPI(title=settings.app_name)
 
 # CORS configuration
 origins = [
-    "https://satori-frontend.vercel.app",  # deployed frontend
-    "http://localhost:3000",               # local dev
+    "https://satori-erp-production-8gmcx.ondigitalocean.app", # REAL production URL
+    "http://localhost:3000",   
+    "http://127.0.0.1:3000",           
 ]
 
 app.add_middleware(
@@ -63,6 +64,10 @@ app.include_router(estimate_snapshot.router, tags=["Estimate Snapshots"])
 
 # NEW: Project router
 app.include_router(project.router, tags=["Projects"])
+
+# NEW: User Management router
+from app.routers import users
+app.include_router(users.router, tags=["User Management"])
 
 @app.on_event("startup")
 def create_tables():
@@ -109,6 +114,46 @@ def create_tables():
             print(f"Warning: Could not setup HRS Estimator: {e}")
     else:
         print("🔐 Production environment detected: Skipping auto-seeding.")
+
+    # Seed default admin from .env (always runs - ensures admin exists)
+    from app.models.admin import Admin
+    from app.core.security import hash_password
+    from sqlalchemy.orm import Session
+    
+    # Only seed if admin credentials are configured
+    if settings.admin_email and settings.admin_password:
+        db = Session(bind=engine)
+        try:
+            existing_admin = db.query(Admin).filter(Admin.email == settings.admin_email).first()
+            if not existing_admin:
+                # Truncate password to 72 bytes for bcrypt compatibility
+                password = settings.admin_password[:72]
+                # Extract username from email (part before @)
+                username = settings.admin_email.split('@')[0]
+                admin_user = Admin(
+                    username=username,
+                    email=settings.admin_email,
+                    hashed_password=hash_password(password),
+                    role="admin"
+                )
+                db.add(admin_user)
+                db.commit()
+                print(f"✅ Default admin created: {settings.admin_email}")
+            else:
+                # Ensure existing admin has admin role
+                if existing_admin.role != "admin":
+                    existing_admin.role = "admin"
+                    db.commit()
+                    print(f"✅ Admin role verified for: {settings.admin_email}")
+                else:
+                    print(f"✅ Admin exists: {settings.admin_email}")
+        except Exception as e:
+            print(f"⚠️ Could not seed admin: {e}")
+            db.rollback()
+        finally:
+            db.close()
+    else:
+        print("⚠️ ADMIN_EMAIL or ADMIN_PASSWORD not set in .env - skipping admin seeding")
 
     print("Database ready.")
 

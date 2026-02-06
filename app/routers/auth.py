@@ -24,8 +24,8 @@ def signup(admin: AdminCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_admin)
     
-    token = create_access_token({"sub": new_admin.email})
-    return {"access_token": token, "token_type": "bearer"}
+    token = create_access_token({"sub": new_admin.email, "role": new_admin.role})
+    return {"access_token": token, "token_type": "bearer", "role": new_admin.role}
 
 
 @router.post("/signin", response_model=Token)
@@ -35,5 +35,5 @@ def signin(data: AdminLogin, db: Session = Depends(get_db)):
     if not admin or not verify_password(data.password, admin.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    token = create_access_token({"sub": admin.email})
-    return {"access_token": token, "token_type": "bearer"}
+    token = create_access_token({"sub": admin.email, "role": admin.role})
+    return {"access_token": token, "token_type": "bearer", "role": admin.role}
