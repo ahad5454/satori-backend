@@ -49,7 +49,7 @@ def seed_hrs_estimator():
 
     # --- Component Lists ---
     asbestos_components = [
-        "GWB/JC", "Flooring", "Ceilings", "Exterior Sides (CAB, etc.)", "Piping", "Tanks"
+        "Walls", "Flooring", "Ceilings", "Exterior Sides (CAB, etc.)", "Piping", "Tanks"
     ]
     lead_components = ["Walls", "Windows", "Doors", "Exterior", "Other"]
     mold_components = ["Living Room", "Kitchen", "Bath", "Crawl Space", "Mech Room", "Bedroom"]

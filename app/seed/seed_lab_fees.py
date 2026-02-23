@@ -29,11 +29,11 @@ def seed_lab_fees():
                 instance = db.query(model).filter_by(**kwargs).first()
             return instance
 
-        # --- 2️⃣ Create Lab1 laboratory (safe - won't duplicate if exists)
-        print("Seeding Lab1 laboratory...")
+        # --- 2️⃣ Create EMSL/LA Testing laboratory (safe - won't duplicate if exists)
+        print("Seeding EMSL/LA Testing laboratory...")
         lab1 = get_or_create(
             Laboratory,
-            name="Lab1",
+            name="EMSL/LA Testing",
             defaults={
                 "address": "123 Health Street, Cityville",
                 "contact_info": "(021) 12345678"
@@ -407,7 +407,7 @@ def seed_lab_fees():
                 db.add(Rate(test_id=test.id, turn_time_id=turn_time.id, lab_id=lab1.id, price=price))
 
         db.commit()
-        print("✅ Lab1 data seeded successfully!")
+        print("✅ EMSL/LA Testing data seeded successfully!")
 
     except Exception as e:
         db.rollback()

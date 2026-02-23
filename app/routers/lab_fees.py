@@ -30,7 +30,70 @@ def create_lab(lab: schemas.LaboratoryCreate, db: Session = Depends(get_db)):
     return new_lab
 
 
-# Service Categories (linked to Labs)
+@router.post("/labs/{lab_id}/duplicate", response_model=schemas.Laboratory)
+def duplicate_lab(lab_id: int, lab: schemas.LaboratoryCreate, db: Session = Depends(get_db)):
+    """Duplicate an existing lab with all its categories, tests, and rates into a new lab."""
+    source_lab = db.query(models.Laboratory).filter(models.Laboratory.id == lab_id).first()
+    if not source_lab:
+        raise HTTPException(status_code=404, detail="Source laboratory not found")
+
+    # Create the new lab
+    new_lab = models.Laboratory(
+        name=lab.name,
+        address=lab.address or source_lab.address,
+        contact_info=lab.contact_info or source_lab.contact_info
+    )
+    db.add(new_lab)
+    db.commit()
+    db.refresh(new_lab)
+
+    # Copy all categories, tests, and rates
+    source_categories = db.query(models.ServiceCategory).filter(
+        models.ServiceCategory.lab_id == lab_id
+    ).all()
+
+    for src_cat in source_categories:
+        new_cat = models.ServiceCategory(
+            name=src_cat.name,
+            description=src_cat.description,
+            lab_id=new_lab.id
+        )
+        db.add(new_cat)
+        db.commit()
+        db.refresh(new_cat)
+
+        # Copy tests for this category
+        src_tests = db.query(models.Test).filter(
+            models.Test.service_category_id == src_cat.id
+        ).all()
+
+        for src_test in src_tests:
+            new_test = models.Test(
+                name=src_test.name,
+                service_category_id=new_cat.id
+            )
+            db.add(new_test)
+            db.commit()
+            db.refresh(new_test)
+
+            # Copy rates for this test
+            src_rates = db.query(models.Rate).filter(
+                models.Rate.test_id == src_test.id,
+                models.Rate.lab_id == lab_id
+            ).all()
+
+            for src_rate in src_rates:
+                new_rate = models.Rate(
+                    test_id=new_test.id,
+                    turn_time_id=src_rate.turn_time_id,
+                    lab_id=new_lab.id,
+                    price=src_rate.price,
+                    sample_count=src_rate.sample_count
+                )
+                db.add(new_rate)
+
+    db.commit()
+    return new_lab
 
 @router.get("/categories/", response_model=List[schemas.ServiceCategory])
 def get_service_categories(lab_id: Optional[int] = None, db: Session = Depends(get_db)):
