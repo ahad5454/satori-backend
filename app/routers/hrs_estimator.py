@@ -157,11 +157,17 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
 
     # -------------------------
     # HOURS CALCULATION
+    # Use override minutes if provided, otherwise fall back to defaults
     # -------------------------
-    h_asb = (DEFAULTS["asbestos"] * total_plm) / 60
-    h_xrf = (DEFAULTS["xrf"] * total_xrf) / 60
-    h_lead = (DEFAULTS["lead"] * total_chips) / 60
-    h_mold = (DEFAULTS["mold"] * (total_tape + total_spore + total_cult)) / 60
+    mins_asb = payload.override_minutes_asbestos if payload.override_minutes_asbestos is not None else DEFAULTS["asbestos"]
+    mins_xrf = payload.override_minutes_xrf if payload.override_minutes_xrf is not None else DEFAULTS["xrf"]
+    mins_lead = payload.override_minutes_lead if payload.override_minutes_lead is not None else DEFAULTS["lead"]
+    mins_mold = payload.override_minutes_mold if payload.override_minutes_mold is not None else DEFAULTS["mold"]
+
+    h_asb = (mins_asb * total_plm) / 60
+    h_xrf = (mins_xrf * total_xrf) / 60
+    h_lead = (mins_lead * total_chips) / 60
+    h_mold = (mins_mold * (total_tape + total_spore + total_cult)) / 60
 
     field_hours = h_asb + h_xrf + h_lead + h_mold
     est.suggested_hours_base = round(field_hours + orm_hours, 2)
@@ -301,8 +307,72 @@ def get_labor_rates(db: Session = Depends(get_db)):
     rates = db.query(models.LaborRate).all()
     return [
         {
+            "id": r.id,
             "labor_role": r.labor_role,
             "hourly_rate": r.hourly_rate
         }
         for r in rates
     ]
+
+
+@router.post("/labor-rates")
+def create_labor_rate(payload: dict, db: Session = Depends(get_db)):
+    """Create a new labor role with hourly rate."""
+    labor_role = payload.get("labor_role", "").strip()
+    hourly_rate = payload.get("hourly_rate")
+
+    if not labor_role:
+        raise HTTPException(status_code=400, detail="Labor role name is required.")
+    if hourly_rate is None or hourly_rate < 0:
+        raise HTTPException(status_code=400, detail="A valid hourly rate is required.")
+
+    # Check for duplicate
+    existing = db.query(models.LaborRate).filter(models.LaborRate.labor_role == labor_role).first()
+    if existing:
+        raise HTTPException(status_code=400, detail=f"Labor role '{labor_role}' already exists.")
+
+    new_rate = models.LaborRate(labor_role=labor_role, hourly_rate=float(hourly_rate))
+    db.add(new_rate)
+    db.commit()
+    db.refresh(new_rate)
+    return {"id": new_rate.id, "labor_role": new_rate.labor_role, "hourly_rate": new_rate.hourly_rate}
+
+
+@router.put("/labor-rates/{rate_id}")
+def update_labor_rate(rate_id: int, payload: dict, db: Session = Depends(get_db)):
+    """Update an existing labor role's name and/or hourly rate."""
+    rate = db.query(models.LaborRate).filter(models.LaborRate.id == rate_id).first()
+    if not rate:
+        raise HTTPException(status_code=404, detail="Labor rate not found.")
+
+    if "labor_role" in payload:
+        new_role = payload["labor_role"].strip()
+        if not new_role:
+            raise HTTPException(status_code=400, detail="Labor role name cannot be empty.")
+        # Check uniqueness if changing name
+        if new_role != rate.labor_role:
+            existing = db.query(models.LaborRate).filter(models.LaborRate.labor_role == new_role).first()
+            if existing:
+                raise HTTPException(status_code=400, detail=f"Labor role '{new_role}' already exists.")
+        rate.labor_role = new_role
+
+    if "hourly_rate" in payload:
+        if payload["hourly_rate"] is None or payload["hourly_rate"] < 0:
+            raise HTTPException(status_code=400, detail="A valid hourly rate is required.")
+        rate.hourly_rate = float(payload["hourly_rate"])
+
+    db.commit()
+    db.refresh(rate)
+    return {"id": rate.id, "labor_role": rate.labor_role, "hourly_rate": rate.hourly_rate}
+
+
+@router.delete("/labor-rates/{rate_id}")
+def delete_labor_rate(rate_id: int, db: Session = Depends(get_db)):
+    """Delete a labor role."""
+    rate = db.query(models.LaborRate).filter(models.LaborRate.id == rate_id).first()
+    if not rate:
+        raise HTTPException(status_code=404, detail="Labor rate not found.")
+
+    db.delete(rate)
+    db.commit()
+    return {"message": f"Labor role '{rate.labor_role}' deleted successfully."}
