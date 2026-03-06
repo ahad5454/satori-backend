@@ -28,6 +28,15 @@ def ensure_hrs_estimator_columns():
             conn.execute(text("ALTER TABLE hrs_estimations ADD COLUMN staff_breakdown JSON;"))
         if "staff_labor_costs" not in columns:
             conn.execute(text("ALTER TABLE hrs_estimations ADD COLUMN staff_labor_costs JSON;"))
+            
+        if "override_percentage_bi" not in columns:
+            conn.execute(text("ALTER TABLE hrs_estimations ADD COLUMN override_percentage_bi FLOAT;"))
+        if "override_percentage_tw" not in columns:
+            conn.execute(text("ALTER TABLE hrs_estimations ADD COLUMN override_percentage_tw FLOAT;"))
+        if "bi_hours" not in columns:
+            conn.execute(text("ALTER TABLE hrs_estimations ADD COLUMN bi_hours FLOAT DEFAULT 0.0;"))
+        if "tw_hours" not in columns:
+            conn.execute(text("ALTER TABLE hrs_estimations ADD COLUMN tw_hours FLOAT DEFAULT 0.0;"))
 
 
 def seed_hrs_estimator():

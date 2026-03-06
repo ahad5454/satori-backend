@@ -99,6 +99,8 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
         override_minutes_xrf=payload.override_minutes_xrf,
         override_minutes_lead=payload.override_minutes_lead,
         override_minutes_mold=payload.override_minutes_mold,
+        override_percentage_bi=payload.override_percentage_bi,
+        override_percentage_tw=payload.override_percentage_tw,
         field_staff_count=payload.field_staff_count,
         efficiency_factor=eff,
     )
@@ -170,8 +172,21 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
     h_mold = (mins_mold * (total_tape + total_spore + total_cult)) / 60
 
     field_hours = h_asb + h_xrf + h_lead + h_mold
-    est.suggested_hours_base = round(field_hours + orm_hours, 2)
-    est.suggested_hours_final = round((field_hours * eff) + orm_hours, 2)
+    
+    # -------------------------
+    # BI AND TW CALCULATION
+    # -------------------------
+    pct_bi = payload.override_percentage_bi if payload.override_percentage_bi is not None else 20.0
+    pct_tw = payload.override_percentage_tw if payload.override_percentage_tw is not None else 50.0
+    
+    bi_hours = field_hours * (pct_bi / 100.0)
+    tw_hours = field_hours * (pct_tw / 100.0)
+    
+    est.bi_hours = bi_hours
+    est.tw_hours = tw_hours
+
+    est.suggested_hours_base = round(field_hours + bi_hours + tw_hours + orm_hours, 2)
+    est.suggested_hours_final = round((field_hours * eff) + bi_hours + tw_hours + orm_hours, 2)
 
     # -------------------------
     # NORMALIZE STAFF INPUT
@@ -278,6 +293,20 @@ def create_estimate(payload: schemas.HRSEstimationCreate, db: Session = Depends(
         "total_spore_trap": est.total_spore_trap,
         "total_culturable": est.total_culturable,
         "orm_hours": est.orm_hours,
+        "bi_hours": est.bi_hours,
+        "tw_hours": est.tw_hours,
+        "suggested_hours_base": est.suggested_hours_base,
+        "override_minutes": {
+            "asbestos": est.override_minutes_asbestos,
+            "xrf": est.override_minutes_xrf,
+            "lead": est.override_minutes_lead,
+            "mold": est.override_minutes_mold
+        },
+        "override_percentages": {
+            "bi": est.override_percentage_bi,
+            "tw": est.override_percentage_tw
+        },
+        "staff_breakdown": est.staff_breakdown,
     }
     save_module_to_snapshot(
         db=db,

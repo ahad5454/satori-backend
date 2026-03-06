@@ -32,6 +32,9 @@ class HRSEstimationCreate(BaseModel):
     override_minutes_xrf: Optional[float] = None
     override_minutes_lead: Optional[float] = None
     override_minutes_mold: Optional[float] = None
+    
+    override_percentage_bi: Optional[float] = None
+    override_percentage_tw: Optional[float] = None
 
     field_staff_count: int = Field(default=1, ge=1)
     efficiency_factor: Optional[float] = None
@@ -91,6 +94,9 @@ class HRSEstimation(BaseModel):
     override_minutes_xrf: Optional[float]
     override_minutes_lead: Optional[float]
     override_minutes_mold: Optional[float]
+    
+    override_percentage_bi: Optional[float]
+    override_percentage_tw: Optional[float]
 
     field_staff_count: int
     efficiency_factor: float
@@ -102,6 +108,8 @@ class HRSEstimation(BaseModel):
     total_spore_trap: float
     total_culturable: float
     orm_hours: float
+    bi_hours: float
+    tw_hours: float
 
     suggested_hours_base: float
     suggested_hours_final: float

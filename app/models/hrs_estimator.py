@@ -21,6 +21,9 @@ class HRSEstimation(Base):
     override_minutes_xrf = Column(Float, nullable=True)
     override_minutes_lead = Column(Float, nullable=True)
     override_minutes_mold = Column(Float, nullable=True)
+    
+    override_percentage_bi = Column(Float, nullable=True)
+    override_percentage_tw = Column(Float, nullable=True)
 
     # field staff adjustment
     field_staff_count = Column(Integer, nullable=False, default=1)
@@ -34,6 +37,8 @@ class HRSEstimation(Base):
     total_spore_trap = Column(Float, nullable=False, default=0.0)
     total_culturable = Column(Float, nullable=False, default=0.0)
     orm_hours = Column(Float, nullable=False, default=0.0)
+    bi_hours = Column(Float, nullable=False, default=0.0)
+    tw_hours = Column(Float, nullable=False, default=0.0)
 
     # suggested hours (base & final)
     suggested_hours_base = Column(Float, nullable=False, default=0.0)
