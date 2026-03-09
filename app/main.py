@@ -101,17 +101,21 @@ def create_tables():
         conn.commit()
     print("Verified: 'sample_count' column exists in rates table.")
 
-    # Ensure HRS Estimator columns & seed data
+    # Ensure HRS Estimator columns exist (runs in ALL environments to handle migrations)
+    from app.seed.seed_hrs_estimator import ensure_hrs_estimator_columns, seed_hrs_estimator
+    try:
+        ensure_hrs_estimator_columns()
+        print("HRS Estimator database schema up-to-date.")
+    except Exception as e:
+        print(f"Warning: Could not setup HRS Estimator schema: {e}")
+
     # STRICT PRODUCTION RULE: No auto-seeding in production
     if settings.environment.lower() != "production":
-        from app.seed.seed_hrs_estimator import ensure_hrs_estimator_columns, seed_hrs_estimator
         try:
-            ensure_hrs_estimator_columns()
-            print("HRS Estimator columns verified.")
             seed_hrs_estimator()
             print("HRS Estimator reference data seeded.")
         except Exception as e:
-            print(f"Warning: Could not setup HRS Estimator: {e}")
+            print(f"Warning: Could not seed HRS Estimator: {e}")
     else:
         print("🔐 Production environment detected: Skipping auto-seeding.")
 
