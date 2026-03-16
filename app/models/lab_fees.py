@@ -68,6 +68,18 @@ class Rate(Base):
     laboratory = relationship("Laboratory", back_populates="rates")
 
 
+class RateHistory(Base):
+    __tablename__ = "rate_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    rate_id = Column(Integer, ForeignKey("rates.id"), nullable=False)
+    old_price = Column(Float, nullable=False)
+    new_price = Column(Float, nullable=False)
+    changed_at = Column(DateTime, default=datetime.utcnow)
+
+    rate = relationship("Rate")
+
+
 # Lab Fees Order/Estimation with Staff Assignments
 class LabFeesOrder(Base):
     __tablename__ = "lab_fees_orders"

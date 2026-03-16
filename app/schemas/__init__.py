@@ -10,6 +10,8 @@ from .lab_fees import (
     TurnTimeCreate,
     Rate,
     RateCreate,
+    RateUpdate,
+    RateHistoryItem,
     LabFeesOrder,
     LabFeesOrderCreate,
     LabFeesStaffAssignment,

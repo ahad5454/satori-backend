@@ -46,6 +46,22 @@ class RateCreate(RateBase):
     pass
 
 
+class RateUpdate(BaseModel):
+    price: Optional[float] = None
+    sample_count: Optional[float] = None
+
+
+class RateHistoryItem(BaseModel):
+    id: int
+    rate_id: int
+    old_price: float
+    new_price: float
+    changed_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class Rate(RateBase):
     id: int
     turn_time: Optional[TurnTime] = None

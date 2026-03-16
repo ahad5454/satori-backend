@@ -243,6 +243,43 @@ def create_rate(rate: schemas.RateCreate, db: Session = Depends(get_db)):
     return new_rate
 
 
+@router.put("/rates/{rate_id}", response_model=schemas.Rate)
+def update_rate(rate_id: int, rate_update: schemas.RateUpdate, db: Session = Depends(get_db)):
+    """Update an existing rate's price and/or sample_count."""
+    rate = db.query(models.Rate).filter(models.Rate.id == rate_id).first()
+    if not rate:
+        raise HTTPException(status_code=404, detail="Rate not found")
+
+    if rate_update.price is not None and rate_update.price != rate.price:
+        # Log the price change to history
+        history_entry = models.RateHistory(
+            rate_id=rate.id,
+            old_price=rate.price,
+            new_price=rate_update.price,
+        )
+        db.add(history_entry)
+        rate.price = rate_update.price
+
+    if rate_update.sample_count is not None:
+        rate.sample_count = rate_update.sample_count
+
+    db.commit()
+    db.refresh(rate)
+    return rate
+
+
+@router.get("/rates/{rate_id}/history", response_model=List[schemas.RateHistoryItem])
+def get_rate_history(rate_id: int, db: Session = Depends(get_db)):
+    """Get the price change history for a specific rate."""
+    history = (
+        db.query(models.RateHistory)
+        .filter(models.RateHistory.rate_id == rate_id)
+        .order_by(models.RateHistory.changed_at.desc())
+        .all()
+    )
+    return history
+
+
 @router.get("/rates/by_lab/{lab_id}", response_model=List[schemas.Rate])
 def get_rates_by_lab(lab_id: int, db: Session = Depends(get_db)):
     rates = db.query(models.Rate).filter(models.Rate.lab_id == lab_id).all()
