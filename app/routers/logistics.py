@@ -499,3 +499,45 @@ def get_labor_rates(db: Session = Depends(get_db)):
     """
     rates = db.query(models.LaborRate).all()
     return [{"labor_role": rate.labor_role, "hourly_rate": rate.hourly_rate} for rate in rates]
+
+
+@router.get("/settings")
+def get_logistics_settings(db: Session = Depends(get_db)):
+    """Get all logistics settings as a key-value dict."""
+    settings = db.query(models.LogisticsSettings).all()
+    result = {s.key: s.value for s in settings}
+    # Return defaults if not set
+    if "per_diem_on_road" not in result:
+        result["per_diem_on_road"] = "50"
+    if "per_diem_off_road" not in result:
+        result["per_diem_off_road"] = "60"
+    if "anchorage_flat_fee" not in result:
+        result["anchorage_flat_fee"] = "45"
+    return result
+
+
+@router.put("/settings")
+def update_logistics_settings(updates: Dict[str, str], db: Session = Depends(get_db)):
+    """Update logistics settings. Accepts a dict of key-value pairs."""
+    allowed_keys = {"per_diem_on_road", "per_diem_off_road", "anchorage_flat_fee"}
+    for key, value in updates.items():
+        if key not in allowed_keys:
+            raise HTTPException(status_code=400, detail=f"Invalid setting key: {key}")
+        existing = db.query(models.LogisticsSettings).filter(
+            models.LogisticsSettings.key == key
+        ).first()
+        if existing:
+            existing.value = value
+        else:
+            db.add(models.LogisticsSettings(key=key, value=value))
+    db.commit()
+    # Return updated settings
+    settings = db.query(models.LogisticsSettings).all()
+    result = {s.key: s.value for s in settings}
+    if "per_diem_on_road" not in result:
+        result["per_diem_on_road"] = "50"
+    if "per_diem_off_road" not in result:
+        result["per_diem_off_road"] = "60"
+    if "anchorage_flat_fee" not in result:
+        result["anchorage_flat_fee"] = "45"
+    return result

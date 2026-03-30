@@ -81,3 +81,11 @@ class LogisticsEstimation(Base):
     total_logistics_cost = Column(Float, nullable=False, default=0.0)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class LogisticsSettings(Base):
+    __tablename__ = "logistics_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String, unique=True, nullable=False)
+    value = Column(String, nullable=False)
