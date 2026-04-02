@@ -312,20 +312,67 @@ def create_lab_fees_order(order: schemas.LabFeesOrderCreate, db: Session = Depen
         # order_details should contain test selections with quantities
         # Format: {"test_id": {"turn_time_id": quantity, ...}, ...}
         for test_id_str, turn_times in order.order_details.items():
-            test_id = int(test_id_str)
-            for turn_time_id_str, quantity in turn_times.items():
-                turn_time_id = int(turn_time_id_str)
-                qty = float(quantity)
+            try:
+                # Handle potential "testId_labId" format or just "testId"
+                test_id = int(test_id_str.split('_')[0])
                 
-                # Find the rate
-                rate = db.query(models.Rate).filter(
-                    models.Rate.test_id == test_id,
-                    models.Rate.turn_time_id == turn_time_id
-                ).first()
-                
-                if rate:
-                    total_samples += qty
-                    total_lab_fees_cost += rate.price * qty
+                if isinstance(turn_times, dict) and 'test_id' not in turn_times:
+                    # NEW FORMAT: {test_id: {turn_time_id: qty}}
+                    for turn_time_id_str, quantity in turn_times.items():
+                        try:
+                            turn_time_id = int(turn_time_id_str)
+                            qty = float(quantity)
+                            
+                            if qty <= 0:
+                                continue
+
+                            # Find the rate
+                            rate = db.query(models.Rate).filter(
+                                models.Rate.test_id == test_id,
+                                models.Rate.turn_time_id == turn_time_id
+                            ).first()
+                            
+                            if rate:
+                                total_samples += qty
+                                total_lab_fees_cost += rate.price * qty
+                        except (ValueError, TypeError):
+                            continue
+
+                elif isinstance(turn_times, dict) and 'test_id' in turn_times:
+                    # LEGACY CART FORMAT: {key: {test_id, turn_time, quantity, price, ...}}
+                    item = turn_times
+                    qty = float(item.get('quantity', 0))
+                    if qty <= 0:
+                        continue
+                    
+                    legacy_test_id = int(item.get('test_id', 0) or item.get('testId', 0))
+                    embedded_price = float(item.get('price', 0))
+                    turn_time_id = item.get('turn_time_id') or item.get('turnTimeId')
+                    
+                    # Prefer DB lookup for current pricing
+                    db_rate = None
+                    if turn_time_id:
+                        db_rate = db.query(models.Rate).filter(
+                            models.Rate.test_id == legacy_test_id,
+                            models.Rate.turn_time_id == int(turn_time_id)
+                        ).first()
+                    
+                    if db_rate:
+                        total_samples += qty
+                        total_lab_fees_cost += db_rate.price * qty
+                    elif embedded_price > 0:
+                        # Fallback: use embedded price when no DB match
+                        import logging
+                        logging.warning(
+                            f"Legacy order item: using embedded price ${embedded_price} for "
+                            f"test_id={legacy_test_id} (no DB rate found). "
+                            f"Price may differ from current rates."
+                        )
+                        total_samples += qty
+                        total_lab_fees_cost += embedded_price * qty
+
+            except (ValueError, TypeError):
+                continue
     
     # Create order
     new_order = models.LabFeesOrder(

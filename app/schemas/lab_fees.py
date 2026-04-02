@@ -134,6 +134,10 @@ class LabFeesOrderBase(BaseModel):
 
 class LabFeesOrderCreate(LabFeesOrderBase):
     staff_assignments: Optional[List[LabFeesStaffAssignmentCreate]] = []
+    # Fields for snapshot persistence (not stored in DB, but needed for form rehydration)
+    cart_items: Optional[List[Dict[str, Any]]] = None
+    quantities_imported_from_hrs: Optional[bool] = False
+    imported_hrs_snapshot_id: Optional[Any] = None
 
 
 class LabFeesOrder(LabFeesOrderBase):
