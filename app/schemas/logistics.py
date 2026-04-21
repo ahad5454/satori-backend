@@ -80,7 +80,6 @@ class LogisticsEstimationCreate(BaseModel):
     num_staff: int = 0
     staff: Optional[List[StaffLineIn]] = None
 
-    rate_multiplier: float = 1.0
     per_diem_rate: float = 0.0
 
     roundtrip_driving: Optional[RoundtripDrivingIn] = None
@@ -104,7 +103,6 @@ class LogisticsEstimation(BaseModel):
     staff_breakdown: Optional[List[Dict[str, Any]]] = None
     staff_labor_costs: Optional[Dict[str, float]] = None
     total_staff_count: int
-    rate_multiplier: float
 
     per_diem_rate: float
 

@@ -138,6 +138,11 @@ class LabFeesOrderCreate(LabFeesOrderBase):
     cart_items: Optional[List[Dict[str, Any]]] = None
     quantities_imported_from_hrs: Optional[bool] = False
     imported_hrs_snapshot_id: Optional[Any] = None
+    # PLM layer multiplier (applied to PLM - Bulk Building Materials tests)
+    plm_layer_multiplier: Optional[float] = 0.715
+    # Lab markup percentage (e.g. 50 = 50%)
+    lab_markup_percent: Optional[float] = 50.0
+
 
 
 class LabFeesOrder(LabFeesOrderBase):

@@ -77,10 +77,6 @@ def create_logistics_estimate(
 
     total_staff = sum(s["count"] for s in staff_list) if staff_list else 0
 
-    # Guard multiplier (never <= 0)
-    rate_multiplier = (
-        payload.rate_multiplier if payload.rate_multiplier and payload.rate_multiplier > 0 else 1.0
-    )
 
     # Create header row 
     est = models.LogisticsEstimation(
@@ -93,7 +89,6 @@ def create_logistics_estimate(
         staff_breakdown=staff_list or None,
         staff_labor_costs={},  # will populate later
         total_staff_count=total_staff,
-        rate_multiplier=rate_multiplier,
         per_diem_rate=payload.per_diem_rate or 0.0,
     )
 

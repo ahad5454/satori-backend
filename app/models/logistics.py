@@ -33,8 +33,6 @@ class LogisticsEstimation(Base):
     # Total staff count
     total_staff_count = Column(Integer, nullable=False, default=0)
 
-    # Global labor rate multiplier (0.50, 0.75, 1.0)
-    rate_multiplier = Column(Float, nullable=False, default=1.0)
 
     # Per diem per person per night
     per_diem_rate = Column(Float, nullable=False, default=0.0)

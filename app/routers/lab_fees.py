@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import math
 from app.database import get_db
 from app import models, schemas
 from app.models.hrs_estimator import LaborRate
@@ -374,6 +375,59 @@ def create_lab_fees_order(order: schemas.LabFeesOrderCreate, db: Session = Depen
             except (ValueError, TypeError):
                 continue
     
+    # --- PLM Layer Calculation ---
+    # Applies only to tests in the "PLM - Bulk Building Materials" (or similar PLM) category
+    PLM_CATEGORY_KEYWORD = "PLM"
+    plm_multiplier = float(order.plm_layer_multiplier or 0.715)
+    plm_combined_qty = 0.0
+    plm_unit_price = 0.0  # Will use first PLM test's unit price
+    plm_layer_samples = 0
+    plm_layer_cost = 0.0
+
+    if order.order_details:
+        for test_id_str, turn_times in order.order_details.items():
+            try:
+                test_id = int(test_id_str.split('_')[0])
+                test = db.query(models.Test).filter(models.Test.id == test_id).first()
+                if not test:
+                    continue
+                category = db.query(models.ServiceCategory).filter(
+                    models.ServiceCategory.id == test.service_category_id
+                ).first()
+                if not category or PLM_CATEGORY_KEYWORD.upper() not in category.name.upper():
+                    continue
+                # This test is in a PLM category — sum its quantities
+                if isinstance(turn_times, dict) and 'test_id' not in turn_times:
+                    for turn_time_id_str, quantity in turn_times.items():
+                        try:
+                            qty = float(quantity)
+                            if qty <= 0:
+                                continue
+                            plm_combined_qty += qty
+                            # Capture unit price from DB
+                            if plm_unit_price == 0.0:
+                                rate = db.query(models.Rate).filter(
+                                    models.Rate.test_id == test_id,
+                                    models.Rate.turn_time_id == int(turn_time_id_str)
+                                ).first()
+                                if rate:
+                                    plm_unit_price = rate.price
+                        except (ValueError, TypeError):
+                            continue
+            except (ValueError, TypeError):
+                continue
+
+    if plm_combined_qty > 0 and plm_unit_price > 0:
+        plm_layer_samples = math.ceil(plm_combined_qty * plm_multiplier)
+        plm_layer_cost = plm_layer_samples * plm_unit_price
+        total_lab_fees_cost += plm_layer_cost
+
+    # --- Lab Markup Calculation ---
+    lab_markup_percent = float(order.lab_markup_percent or 50.0)
+    subtotal_cost = total_lab_fees_cost  # before markup
+    lab_markup_amount = subtotal_cost * (lab_markup_percent / 100.0)
+    total_cost_with_markup = subtotal_cost + lab_markup_amount
+
     # Create order
     new_order = models.LabFeesOrder(
         project_name=order.project_name,
@@ -382,7 +436,7 @@ def create_lab_fees_order(order: schemas.LabFeesOrderCreate, db: Session = Depen
         total_samples=total_samples,
         total_lab_fees_cost=total_lab_fees_cost,
         total_staff_labor_cost=0.0,
-        total_cost=total_lab_fees_cost
+        total_cost=total_cost_with_markup
     )
     db.add(new_order)
     db.flush()  # Get order.id
@@ -435,9 +489,12 @@ def create_lab_fees_order(order: schemas.LabFeesOrderCreate, db: Session = Depen
             
             total_staff_labor_cost += total_cost
     
-    # Update order totals
+    # Update order totals (include staff + markup)
     new_order.total_staff_labor_cost = total_staff_labor_cost
-    new_order.total_cost = total_lab_fees_cost + total_staff_labor_cost
+    # Subtotal = lab fees (incl PLM layers) + staff labor
+    subtotal_before_markup = total_lab_fees_cost + total_staff_labor_cost
+    lab_markup_amount = subtotal_before_markup * (lab_markup_percent / 100.0)
+    new_order.total_cost = subtotal_before_markup + lab_markup_amount
     new_order.staff_breakdown = staff_breakdown
     new_order.staff_labor_costs = staff_labor_costs
     
@@ -477,6 +534,16 @@ def create_lab_fees_order(order: schemas.LabFeesOrderCreate, db: Session = Depen
         "order_details": new_order.order_details,
         "staff_breakdown": new_order.staff_breakdown,
         "staff_labor_costs": new_order.staff_labor_costs,
+        # PLM layer fields
+        "plm_combined_qty": plm_combined_qty,
+        "plm_multiplier": plm_multiplier,
+        "plm_layer_samples": plm_layer_samples,
+        "plm_layer_cost": plm_layer_cost,
+        "plm_unit_price": plm_unit_price,
+        # Markup fields
+        "subtotal_cost": subtotal_before_markup,
+        "lab_markup_percent": lab_markup_percent,
+        "lab_markup_amount": lab_markup_amount,
         "created_at": new_order.created_at.isoformat() if new_order.created_at else None,
     }
     save_module_to_snapshot(

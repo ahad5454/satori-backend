@@ -23,6 +23,9 @@ from app.routers import hrs_estimator
 # Logistics router import
 from app.routers import logistics
 
+# Lab Settings router import
+from app.routers import lab_settings
+
 # Project Summary router import
 from app.routers import project_summary
 
@@ -51,6 +54,7 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(lab_fees.router, prefix="/lab-fees", tags=["Lab Fees"])
+app.include_router(lab_settings.router, prefix="/lab-fees", tags=["Lab Settings"])
 app.include_router(hrs_estimator.router, prefix="/hrs-estimator", tags=["HRS Estimator"])
 
 # NEW: Logistics router
