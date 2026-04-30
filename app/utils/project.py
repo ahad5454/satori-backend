@@ -104,6 +104,7 @@ def update_project_summary(
     hrs_estimator_total: Optional[float] = None,
     lab_fees_total: Optional[float] = None,
     logistics_total: Optional[float] = None,
+    equipment_total: Optional[float] = None,
     latest_snapshot_id: Optional[int] = None
 ) -> None:
     """
@@ -117,6 +118,7 @@ def update_project_summary(
         hrs_estimator_total: Latest HRS estimator total
         lab_fees_total: Latest Lab Fees total
         logistics_total: Latest Logistics total
+        equipment_total: Latest Equipment total
         latest_snapshot_id: ID of the latest snapshot
     
     Note:
@@ -132,6 +134,8 @@ def update_project_summary(
         project.lab_fees_total = lab_fees_total
     if logistics_total is not None:
         project.logistics_total = logistics_total
+    if equipment_total is not None:
+        project.equipment_total = equipment_total
     if latest_snapshot_id is not None:
         project.latest_snapshot_id = latest_snapshot_id
     
@@ -139,7 +143,8 @@ def update_project_summary(
     totals = [
         project.hrs_estimator_total or 0.0,
         project.lab_fees_total or 0.0,
-        project.logistics_total or 0.0
+        project.logistics_total or 0.0,
+        project.equipment_total or 0.0
     ]
     project.grand_total = sum(totals) if any(totals) else None
     project.latest_estimate_date = datetime.utcnow()

@@ -107,6 +107,7 @@ def create_tables():
     with engine.connect() as conn:
         conn.execute(text("ALTER TABLE rates ADD COLUMN IF NOT EXISTS sample_count DOUBLE PRECISION;"))
         conn.execute(text("ALTER TABLE estimate_snapshots ADD COLUMN IF NOT EXISTS equipment_data JSON;"))
+        conn.execute(text("ALTER TABLE projects ADD COLUMN IF NOT EXISTS equipment_total DOUBLE PRECISION;"))
         conn.commit()
     print("Verified: 'sample_count' column exists in rates table.")
     print("Verified: 'equipment_data' column exists in estimate_snapshots table.")

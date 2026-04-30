@@ -28,6 +28,7 @@ class Project(Base):
     hrs_estimator_total = Column(Float, nullable=True, default=None)
     lab_fees_total = Column(Float, nullable=True, default=None)
     logistics_total = Column(Float, nullable=True, default=None)
+    equipment_total = Column(Float, nullable=True, default=None)
     grand_total = Column(Float, nullable=True, default=None)
     
     # Latest estimate metadata

@@ -72,6 +72,8 @@ def save_module_to_snapshot(
             active_snapshot.lab_fees_data = module_data
         elif module_name == "logistics":
             active_snapshot.logistics_data = module_data
+        elif module_name == "equipment":
+            active_snapshot.equipment_data = module_data
         
         # Denormalize project_name for backward compatibility
         active_snapshot.project_name = project_name
@@ -91,7 +93,8 @@ def save_module_to_snapshot(
         snapshot_data = {
             "hrs_estimator_data": None,
             "lab_fees_data": None,
-            "logistics_data": None
+            "logistics_data": None,
+            "equipment_data": None
         }
         
         module_data = {
@@ -105,6 +108,8 @@ def save_module_to_snapshot(
             snapshot_data["lab_fees_data"] = module_data
         elif module_name == "logistics":
             snapshot_data["logistics_data"] = module_data
+        elif module_name == "equipment":
+            snapshot_data["equipment_data"] = module_data
         
         new_snapshot = EstimateSnapshot(
             project_id=project_id,
@@ -123,6 +128,7 @@ def save_module_to_snapshot(
     hrs_total = None
     lab_total = None
     logistics_total = None
+    equipment_total = None
     
     if module_name == "hrs_estimator" and outputs:
         hrs_total = outputs.get("total_cost")
@@ -130,6 +136,8 @@ def save_module_to_snapshot(
         lab_total = outputs.get("total_cost")
     elif module_name == "logistics" and outputs:
         logistics_total = outputs.get("total_logistics_cost")
+    elif module_name == "equipment" and outputs:
+        equipment_total = outputs.get("total_cost")
     
     update_project_summary(
         db=db,
@@ -137,6 +145,7 @@ def save_module_to_snapshot(
         hrs_estimator_total=hrs_total,
         lab_fees_total=lab_total,
         logistics_total=logistics_total,
+        equipment_total=equipment_total,
         latest_snapshot_id=snapshot_id
     )
     
@@ -195,7 +204,8 @@ def create_new_snapshot_from_active(
         is_active=True,
         hrs_estimator_data=active.hrs_estimator_data,
         lab_fees_data=active.lab_fees_data,
-        logistics_data=active.logistics_data
+        logistics_data=active.logistics_data,
+        equipment_data=active.equipment_data
     )
     db.add(new_snapshot)
     db.flush()

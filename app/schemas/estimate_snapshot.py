@@ -19,6 +19,7 @@ class EstimateSnapshotUpdate(BaseModel):
     hrs_estimator_data: Optional[Dict[str, Any]] = None
     lab_fees_data: Optional[Dict[str, Any]] = None
     logistics_data: Optional[Dict[str, Any]] = None
+    equipment_data: Optional[Dict[str, Any]] = None
 
 
 class EstimateSnapshot(EstimateSnapshotBase):
@@ -28,6 +29,7 @@ class EstimateSnapshot(EstimateSnapshotBase):
     hrs_estimator_data: Optional[Dict[str, Any]] = None
     lab_fees_data: Optional[Dict[str, Any]] = None
     logistics_data: Optional[Dict[str, Any]] = None
+    equipment_data: Optional[Dict[str, Any]] = None
     created_at: datetime
     updated_at: datetime
     
@@ -48,6 +50,7 @@ class EstimateSnapshotList(BaseModel):
     hrs_estimator_total: Optional[float] = None
     lab_fees_total: Optional[float] = None
     logistics_total: Optional[float] = None
+    equipment_total: Optional[float] = None
     grand_total: Optional[float] = None
     
     class Config:

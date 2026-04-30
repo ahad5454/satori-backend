@@ -90,6 +90,7 @@ def list_all_snapshots_global(db: Session = Depends(get_db)):
             hrs_total = None
             lab_total = None
             logistics_total = None
+            equipment_total = None
             
             if snapshot.hrs_estimator_data and snapshot.hrs_estimator_data.get("outputs"):
                 hrs_total = snapshot.hrs_estimator_data["outputs"].get("total_cost")
@@ -99,10 +100,13 @@ def list_all_snapshots_global(db: Session = Depends(get_db)):
             
             if snapshot.logistics_data and snapshot.logistics_data.get("outputs"):
                 logistics_total = snapshot.logistics_data["outputs"].get("total_logistics_cost")
+                
+            if snapshot.equipment_data and snapshot.equipment_data.get("outputs"):
+                equipment_total = snapshot.equipment_data["outputs"].get("total_cost")
             
             grand_total = sum(
                 (t if t is not None else 0.0) 
-                for t in [hrs_total, lab_total, logistics_total]
+                for t in [hrs_total, lab_total, logistics_total, equipment_total]
             )
             
             snapshot_list.append(EstimateSnapshotList(
@@ -115,6 +119,7 @@ def list_all_snapshots_global(db: Session = Depends(get_db)):
                 hrs_estimator_total=hrs_total,
                 lab_fees_total=lab_total,
                 logistics_total=logistics_total,
+                equipment_total=equipment_total,
                 grand_total=round(grand_total, 2) if grand_total else None
             ))
         
@@ -162,6 +167,7 @@ def list_project_snapshots(project_name: str, db: Session = Depends(get_db)):
         hrs_total = None
         lab_total = None
         logistics_total = None
+        equipment_total = None
         
         if snapshot.hrs_estimator_data and snapshot.hrs_estimator_data.get("outputs"):
             hrs_total = snapshot.hrs_estimator_data["outputs"].get("total_cost")
@@ -171,10 +177,13 @@ def list_project_snapshots(project_name: str, db: Session = Depends(get_db)):
         
         if snapshot.logistics_data and snapshot.logistics_data.get("outputs"):
             logistics_total = snapshot.logistics_data["outputs"].get("total_logistics_cost")
+            
+        if snapshot.equipment_data and snapshot.equipment_data.get("outputs"):
+            equipment_total = snapshot.equipment_data["outputs"].get("total_cost")
         
         grand_total = sum(
             (t if t is not None else 0.0) 
-            for t in [hrs_total, lab_total, logistics_total]
+            for t in [hrs_total, lab_total, logistics_total, equipment_total]
         )
         
         result.append(EstimateSnapshotList(
@@ -187,6 +196,7 @@ def list_project_snapshots(project_name: str, db: Session = Depends(get_db)):
             hrs_estimator_total=hrs_total,
             lab_fees_total=lab_total,
             logistics_total=logistics_total,
+            equipment_total=equipment_total,
             grand_total=round(grand_total, 2) if grand_total else None
         ))
     
@@ -288,7 +298,8 @@ def save_and_close_project(project_name: str, db: Session = Depends(get_db)):
             is_active=True,
             hrs_estimator_data=None,
             lab_fees_data=None,
-            logistics_data=None
+            logistics_data=None,
+            equipment_data=None
         )
         db.add(active_snapshot)
     

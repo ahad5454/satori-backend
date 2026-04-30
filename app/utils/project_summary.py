@@ -78,6 +78,7 @@ def save_or_update_module_summary(
     hrs_total = None
     lab_total = None
     logistics_total = None
+    equipment_total = None
     
     if module_name == "hrs_estimator":
         hrs_total = estimate_total
@@ -85,13 +86,16 @@ def save_or_update_module_summary(
         lab_total = estimate_total
     elif module_name == "logistics":
         logistics_total = estimate_total
+    elif module_name == "equipment":
+        equipment_total = estimate_total
     
     update_project_summary(
         db=db,
         project_id=project_id,
         hrs_estimator_total=hrs_total,
         lab_fees_total=lab_total,
-        logistics_total=logistics_total
+        logistics_total=logistics_total,
+        equipment_total=equipment_total
     )
     
     # Note: Caller is responsible for committing the transaction

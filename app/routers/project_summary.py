@@ -37,7 +37,8 @@ def get_project_estimate_summary(project_name: str, db: Session = Depends(get_db
     modules: Dict[str, Optional[float]] = {
         "hrs_estimator": project.hrs_estimator_total,
         "lab": project.lab_fees_total,
-        "logistics": project.logistics_total
+        "logistics": project.logistics_total,
+        "equipment": project.equipment_total
     }
     
     # If Project table doesn't have summary data, fetch from ProjectEstimateSummary table
@@ -50,7 +51,8 @@ def get_project_estimate_summary(project_name: str, db: Session = Depends(get_db
         modules = {
             "hrs_estimator": None,
             "lab": None,
-            "logistics": None
+            "logistics": None,
+            "equipment": None
         }
         
         # Populate with actual values from database
