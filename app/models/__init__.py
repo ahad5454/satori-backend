@@ -6,3 +6,4 @@ from .project import Project
 from .project_summary import ProjectEstimateSummary
 from .estimate_snapshot import EstimateSnapshot
 from .lab_settings import LabSettings
+from .equipment_consumables import EquipmentCategory, EquipmentItem, EquipmentOrder

@@ -60,6 +60,10 @@ app.include_router(hrs_estimator.router, prefix="/hrs-estimator", tags=["HRS Est
 # NEW: Logistics router
 app.include_router(logistics.router, prefix="/logistics", tags=["Logistics"])
 
+# NEW: Equipment & Consumables router
+from app.routers import equipment_consumables
+app.include_router(equipment_consumables.router, prefix="/equipment", tags=["Equipment & Consumables"])
+
 # NEW: Project Summary router
 app.include_router(project_summary.router, tags=["Project Summary"])
 
@@ -102,8 +106,10 @@ def create_tables():
     # Ensure new column sample_count exists in rates table
     with engine.connect() as conn:
         conn.execute(text("ALTER TABLE rates ADD COLUMN IF NOT EXISTS sample_count DOUBLE PRECISION;"))
+        conn.execute(text("ALTER TABLE estimate_snapshots ADD COLUMN IF NOT EXISTS equipment_data JSON;"))
         conn.commit()
     print("Verified: 'sample_count' column exists in rates table.")
+    print("Verified: 'equipment_data' column exists in estimate_snapshots table.")
 
     # Ensure HRS Estimator columns exist (runs in ALL environments to handle migrations)
     from app.seed.seed_hrs_estimator import ensure_hrs_estimator_columns, seed_hrs_estimator

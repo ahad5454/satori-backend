@@ -32,6 +32,7 @@ class EstimateSnapshot(Base):
     hrs_estimator_data = Column(JSON, nullable=True)  # {inputs: {...}, outputs: {...}}
     lab_fees_data = Column(JSON, nullable=True)     # {inputs: {...}, outputs: {...}}
     logistics_data = Column(JSON, nullable=True)    # {inputs: {...}, outputs: {...}}
+    equipment_data = Column(JSON, nullable=True)    # {inputs: {...}, outputs: {...}}
     
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

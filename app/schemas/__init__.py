@@ -21,3 +21,4 @@ from .lab_fees import (
 from.hrs_estimator import *
 
 from .logistics import *
+from .equipment_consumables import *
