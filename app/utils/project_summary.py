@@ -72,31 +72,11 @@ def save_or_update_module_summary(
         )
         db.add(summary)
     
-    # Update Project table's denormalized summary fields (for quick access)
-    from app.utils.project import update_project_summary
-    
-    hrs_total = None
-    lab_total = None
-    logistics_total = None
-    equipment_total = None
-    
-    if module_name == "hrs_estimator":
-        hrs_total = estimate_total
-    elif module_name == "lab":
-        lab_total = estimate_total
-    elif module_name == "logistics":
-        logistics_total = estimate_total
-    elif module_name == "equipment":
-        equipment_total = estimate_total
-    
-    update_project_summary(
-        db=db,
-        project_id=project_id,
-        hrs_estimator_total=hrs_total,
-        lab_fees_total=lab_total,
-        logistics_total=logistics_total,
-        equipment_total=equipment_total
-    )
+    # Note: Project table's denormalized summary fields (hrs_estimator_total, lab_fees_total, etc.)
+    # are updated by save_module_to_snapshot() which calls update_project_summary() with the
+    # complete set of parameters including latest_snapshot_id. We intentionally do NOT call
+    # update_project_summary here to avoid a redundant double-update within the same transaction,
+    # which could cause stale-state issues with SQLAlchemy's identity map.
     
     # Note: Caller is responsible for committing the transaction
 
