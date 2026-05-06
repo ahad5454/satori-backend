@@ -37,6 +37,9 @@ class LogisticsEstimation(Base):
     # Per diem per person per night
     per_diem_rate = Column(Float, nullable=False, default=0.0)
 
+    # Rate multiplier
+    rate_multiplier = Column(Float, nullable=False, default=1.0)
+
     # Raw input snapshots
     driving_input = Column(JSON, nullable=True)   # {"roundtrip": {...}, "daily": {...}}
     flights_input = Column(JSON, nullable=True)
