@@ -153,3 +153,22 @@ def create_order(order: schemas.EquipmentOrderCreate, db: Session = Depends(get_
 @router.get("/orders/{project_name}", response_model=List[schemas.EquipmentOrder])
 def get_orders(project_name: str, db: Session = Depends(get_db)):
     return db.query(models.EquipmentOrder).filter(models.EquipmentOrder.project_name == project_name).order_by(models.EquipmentOrder.created_at.desc()).all()
+
+@router.get("/seed")
+def auto_seed_equipment():
+    """Quick and easy endpoint to seed the equipment database without SSH."""
+    import sys
+    import os
+    try:
+        # Import the seeding function from the backend directory
+        backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        if backend_dir not in sys.path:
+            sys.path.append(backend_dir)
+            
+        from seed_equipment import seed_equipment
+        
+        # Execute the seed script
+        seed_equipment()
+        return {"message": "Successfully seeded the equipment and consumables database!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to seed database: {str(e)}")
