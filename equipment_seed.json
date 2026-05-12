@@ -1,0 +1,342 @@
+{
+    "SECTION 1 — CONSUMABLES & MATERIALS": {
+        "PERSONAL PROTECTIVE EQUIPMENT (PPE)": [
+            {
+                "name": "Tyvek Coveralls (Type C)",
+                "unit": "EA",
+                "unit_cost": 4.25,
+                "total_cost": 0
+            },
+            {
+                "name": "Nitrile Gloves — Box of 100",
+                "unit": "BX",
+                "unit_cost": 18.5,
+                "total_cost": 0
+            },
+            {
+                "name": "Half-Face Respirator w/ P100 Cartridges",
+                "unit": "EA",
+                "unit_cost": 42,
+                "total_cost": 0
+            },
+            {
+                "name": "N95 Disposable Respirators (Box of 20)",
+                "unit": "BX",
+                "unit_cost": 22,
+                "total_cost": 0
+            },
+            {
+                "name": "Safety Glasses / Goggles",
+                "unit": "EA",
+                "unit_cost": 6.75,
+                "total_cost": 0
+            },
+            {
+                "name": "Disposable Boot Covers",
+                "unit": "PR",
+                "unit_cost": 0.85,
+                "total_cost": 0
+            }
+        ],
+        "SAMPLING SUPPLIES — ASBESTOS (ACM)": [
+            {
+                "name": "Bulk Sample Bags (4\" x 6\" zip-lock)",
+                "unit": "EA",
+                "unit_cost": 0.35,
+                "total_cost": 0
+            },
+            {
+                "name": "Bulk Sample Jars (2 oz, w/ lid)",
+                "unit": "EA",
+                "unit_cost": 0.65,
+                "total_cost": 0
+            },
+            {
+                "name": "Sample Labels — Pre-printed / Writeable",
+                "unit": "PK",
+                "unit_cost": 18,
+                "total_cost": 0
+            },
+            {
+                "name": "Chain of Custody Forms (pad of 50)",
+                "unit": "EA",
+                "unit_cost": 12,
+                "total_cost": 0
+            },
+            {
+                "name": "HEPA Vacuum (handheld, rental)",
+                "unit": "DY",
+                "unit_cost": 45,
+                "total_cost": 0
+            },
+            {
+                "name": "Amended Water — Surfactant (spray bottle)",
+                "unit": "EA",
+                "unit_cost": 8.5,
+                "total_cost": 0
+            },
+            {
+                "name": "Mastic Solvent (small can)",
+                "unit": "EA",
+                "unit_cost": 14,
+                "total_cost": 0
+            },
+            {
+                "name": "Poly Sheet — 6 mil (cut pieces for drop)",
+                "unit": "RL",
+                "unit_cost": 38,
+                "total_cost": 0
+            }
+        ],
+        "SAMPLING SUPPLIES — LEAD-BASED PAINT (LBP)": [
+            {
+                "name": "Paint Chip Sample Bags (small, zip-lock)",
+                "unit": "EA",
+                "unit_cost": 0.45,
+                "total_cost": 0
+            },
+            {
+                "name": "Paint Chip Sample Labels",
+                "unit": "PK",
+                "unit_cost": 12,
+                "total_cost": 0
+            },
+            {
+                "name": "XRF Calibration Standards (check source)",
+                "unit": "EA",
+                "unit_cost": 85,
+                "total_cost": 0
+            },
+            {
+                "name": "Masking Tape (1\" blue)",
+                "unit": "RL",
+                "unit_cost": 5.5,
+                "total_cost": 0
+            },
+            {
+                "name": "Permanent Markers / Paint Pens",
+                "unit": "PK",
+                "unit_cost": 8,
+                "total_cost": 0
+            },
+            {
+                "name": "Putty / Spackling (small tub)",
+                "unit": "EA",
+                "unit_cost": 7.5,
+                "total_cost": 0
+            }
+        ],
+        "SAMPLING SUPPLIES — PCBs (CAULK, PAINT, MISCELLANEOUS)": [
+            {
+                "name": "Wipe Sample Media (gauze pads, box)",
+                "unit": "BX",
+                "unit_cost": 32,
+                "total_cost": 0
+            },
+            {
+                "name": "Wipe Sample Containers (glass, w/ lid)",
+                "unit": "EA",
+                "unit_cost": 2.25,
+                "total_cost": 0
+            },
+            {
+                "name": "Isopropyl Alcohol (spray, 1 qt)",
+                "unit": "QT",
+                "unit_cost": 9.5,
+                "total_cost": 0
+            },
+            {
+                "name": "Caulk Removal Tool / Oscillating Blade",
+                "unit": "EA",
+                "unit_cost": 24,
+                "total_cost": 0
+            },
+            {
+                "name": "Replacement Caulk — Paintable Latex (tube)",
+                "unit": "EA",
+                "unit_cost": 6.5,
+                "total_cost": 0
+            },
+            {
+                "name": "Roof Patch / Lap Sealant (cartridge)",
+                "unit": "EA",
+                "unit_cost": 18,
+                "total_cost": 0
+            },
+            {
+                "name": "Roofing Caulk — Asphalt-Based (tube)",
+                "unit": "EA",
+                "unit_cost": 12.5,
+                "total_cost": 0
+            },
+            {
+                "name": "Caulk Gun",
+                "unit": "EA",
+                "unit_cost": 11,
+                "total_cost": 0
+            },
+            {
+                "name": "Foam Backer Rod (assorted, bag)",
+                "unit": "BG",
+                "unit_cost": 16,
+                "total_cost": 0
+            }
+        ],
+        "FIELD DOCUMENTATION & MISCELLANEOUS": [
+            {
+                "name": "Field Notebook / Log Book",
+                "unit": "EA",
+                "unit_cost": 12,
+                "total_cost": 0
+            },
+            {
+                "name": "Clipboard w/ Cover",
+                "unit": "EA",
+                "unit_cost": 9.5,
+                "total_cost": 0
+            },
+            {
+                "name": "iPad",
+                "unit": "EA",
+                "unit_cost": 25,
+                "total_cost": 0
+            },
+            {
+                "name": "Measuring Tape (25 ft)",
+                "unit": "EA",
+                "unit_cost": 14,
+                "total_cost": 0
+            },
+            {
+                "name": "Flashlight / Headlamp",
+                "unit": "EA",
+                "unit_cost": 18,
+                "total_cost": 0
+            },
+            {
+                "name": "Utility Knife w/ Extra Blades",
+                "unit": "EA",
+                "unit_cost": 12.5,
+                "total_cost": 0
+            },
+            {
+                "name": "Zipper-Lock Bags — Assorted (box)",
+                "unit": "BX",
+                "unit_cost": 14,
+                "total_cost": 0
+            },
+            {
+                "name": "Shipping Box / Bubble Wrap (lab submittal)",
+                "unit": "EA",
+                "unit_cost": 8.5,
+                "total_cost": 0
+            }
+        ]
+    },
+    "SECTION 2 — EQUIPMENT & INSTRUMENTATION": {
+        "XRF INSTRUMENT & LBP TESTING EQUIPMENT": [
+            {
+                "name": "XRF Analyzer — Rental (Viken/Olympus/RMD)",
+                "unit": "DY",
+                "unit_cost": 285,
+                "total_cost": 0
+            },
+            {
+                "name": "XRF Battery / Charger (spare set)",
+                "unit": "EA",
+                "unit_cost": 55,
+                "total_cost": 0
+            },
+            {
+                "name": "XRF Carrying Case / Transport Fee",
+                "unit": "LS",
+                "unit_cost": 75,
+                "total_cost": 0
+            }
+        ],
+        "ASBESTOS SURVEY EQUIPMENT": [
+            {
+                "name": "HEPA Vacuum (commercial, rental)",
+                "unit": "DY",
+                "unit_cost": 55,
+                "total_cost": 0
+            },
+            {
+                "name": "Air Sampling Pump (rental)",
+                "unit": "DY",
+                "unit_cost": 40,
+                "total_cost": 0
+            },
+            {
+                "name": "PCM / Phase Contrast Cassettes (box of 25)",
+                "unit": "BX",
+                "unit_cost": 85,
+                "total_cost": 0
+            },
+            {
+                "name": "Borescope / Inspection Camera",
+                "unit": "DY",
+                "unit_cost": 75,
+                "total_cost": 0
+            },
+            {
+                "name": "Core Sampling Bit Set (tile/masonry)",
+                "unit": "EA",
+                "unit_cost": 65,
+                "total_cost": 0
+            }
+        ],
+        "PCB SURVEY EQUIPMENT": [
+            {
+                "name": "PCB Field Screening Kit (Clor-N-Soil or similar)",
+                "unit": "EA",
+                "unit_cost": 145,
+                "total_cost": 0
+            },
+            {
+                "name": "Wipe Sample Template (100 cm² stencil)",
+                "unit": "EA",
+                "unit_cost": 8,
+                "total_cost": 0
+            },
+            {
+                "name": "Oscillating Multi-Tool (rental)",
+                "unit": "DY",
+                "unit_cost": 45,
+                "total_cost": 0
+            },
+            {
+                "name": "Rotary Hammer Drill (rental)",
+                "unit": "DY",
+                "unit_cost": 55,
+                "total_cost": 0
+            }
+        ],
+        "ACCESS EQUIPMENT": [
+            {
+                "name": "Articulating Manlift / Boom Lift (40')",
+                "unit": "DY",
+                "unit_cost": 425,
+                "total_cost": 0
+            },
+            {
+                "name": "Scissor Lift (19' — interior)",
+                "unit": "DY",
+                "unit_cost": 195,
+                "total_cost": 0
+            },
+            {
+                "name": "Extension Ladder (24' / 32')",
+                "unit": "DY",
+                "unit_cost": 55,
+                "total_cost": 0
+            },
+            {
+                "name": "Step Ladder (8' fiberglass)",
+                "unit": "DY",
+                "unit_cost": 18,
+                "total_cost": 0
+            }
+        ]
+    }
+}

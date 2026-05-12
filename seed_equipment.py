@@ -10,7 +10,7 @@ from app.models.equipment_consumables import EquipmentCategory, EquipmentItem
 
 def seed_equipment():
     # Path to the seed file relative to the script directory
-    seed_file_path = os.path.join(os.path.dirname(__file__), '..', 'equipment_seed.json')
+    seed_file_path = os.path.join(os.path.dirname(__file__), 'equipment_seed.json')
     
     with open(seed_file_path, 'r') as f:
         data = json.load(f)
